@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            初入vagrant
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/05/11/e5-88-9d-e5-85-a5vagrant/"> 
+                    初入vagrant 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-05-11   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟化技术/">虚拟化技术</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#sudo-apt-get-update"><span class="toc-list-text"><a href="#sudo-apt-get-update" class="headerlink" title="sudo apt-get update"></a>sudo apt-get update</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#sudo-apt-get-install-y-apache2"><span class="toc-list-text"><a href="#sudo-apt-get-install-y-apache2" class="headerlink" title="sudo apt-get install -y apache2"></a>sudo apt-get install -y apache2</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#SHELL"><span class="toc-list-text"><a href="#SHELL" class="headerlink" title="SHELL"></a>SHELL</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#Display-the-VirtualBox-GUI-when-booting-the-machine"><span class="toc-list-text"><a href="#Display-the-VirtualBox-GUI-when-booting-the-machine" class="headerlink" title="# Display the VirtualBox GUI when booting the machine"></a># Display the VirtualBox GUI when booting the machine</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#vb-gui-true"><span class="toc-list-text"><a href="#vb-gui-true" class="headerlink" title="vb.gui = true"></a>vb.gui = true</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#Customize-the-amount-of-memory-on-the-VM"><span class="toc-list-text"><a href="#Customize-the-amount-of-memory-on-the-VM" class="headerlink" title="# Customize the amount of memory on the VM:"></a># Customize the amount of memory on the VM:</span></a></li></ol>
+</div>
+            <div class="content">
+                <p>进入速聘实习后，第一个遇到的是开发环境配置。他们使用的是vagrant+docker部署。先说说vagrant吧。</p>
+<blockquote>
+<p>Vagrant可以为你提供可配置、可再生、便携的工作环境，它主要是一个中间层技术，它的下层是VirtualBox, VMware, AWS或者其他provider，它的上层是provisioning工具，比如shell scripts, Chef, or Puppet等可以自动化安装和配置软件的工具。<br>所以它就是一个虚拟机！</p>
+</blockquote>
+<ul>
+<li>对于开发人员来说，Vagrant可以帮你统一团队成员的开发环境。如果你或者你的伙伴创建了一个Vagrantfile，那么你只需要执行<code>vagrant up</code>就行了，所有的软件都会安装并且配置好。团队成员可以通过相同的Vagrantfile来创建他们的开发环境，无论他们是在Linux, Mac OS X, 或者Windows下，这样就可以保证你团队成员的代码是跑在相同的环境中，从而避免令人烦躁的【在我的机器上是可以的】问题。</li>
+<li>对于运维人员来说，Vagrant可以给你提供一次性，并且与线上一致的服务器环境，你可以利用VirtualBox或者VMware来测试你的shell scripts, Chef cookbooks, Puppet modules等管理脚本。你不需要再苦逼的登录到线上服务器提心吊胆的测试了，Vagrant可以解救你。</li>
+<li>对于设计人员来说，Vagrant可以帮你处理一切，你只需要专注在设计上就好了。一旦开发人员帮你配置好了Vagrant之后，你只需要执行<code>vagrant up</code>，然后开始设计。<br>它的使用也很简单，首先下载<a href="https://www.virtualbox.org/wiki/Downloads" target="_blank" rel="noopener">vbox</a>和<a href="http://www.vagrantup.com/downloads" target="_blank" rel="noopener">vagrant</a>。然后就是你的<a href="https://atlas.hashicorp.com/boxes/search" target="_blank" rel="noopener">box</a>，就是你的vbox镜像，选择你想要的环境。</li>
+</ul>
+<p>然后cd到你的box目录。开始我们的vagrant之路。</p>
+<p><pre>vagrant box add you_name xxx.box //在vbox加入你的box<br>vagrant init you_name  //生成Vagrantfile<br>vim Vagrantfile</pre><br>在Vagrant里面我们进行一些必要的配置。</p>
+<p>1：网络配置（config.vm.network）</p>
+<p>1.1：public_network 虚拟机使用与宿主机同一个网段，外网也可以访问。（桥接网络）</p>
+<p>1.2：private_network 虚拟机使用一个特定的ip，宿主机作为路由器，仅内网访问。</p>
+<p>1.3：hostly-only （默认）虚拟机使用127.0.0.1环回。仅内网访问</p>
+<p>2：文件夹共享（config.vm.synced_folder）</p>
+<p>2.1：“宿主目录”, “虚拟机目录”</p>
+<p>3：自动化部署工具（config.vm.provision）</p>
+<p>2.1：chef</p>
+<p>2.2：puppet</p>
+<p>3.2：shell</p>
+<p><pre># config.vm.provision “shell”, inline: &lt;&lt;-SHELL</pre></p>
+<h1 id="sudo-apt-get-update"><a href="#sudo-apt-get-update" class="headerlink" title="sudo apt-get update"></a>sudo apt-get update</h1><h1 id="sudo-apt-get-install-y-apache2"><a href="#sudo-apt-get-install-y-apache2" class="headerlink" title="sudo apt-get install -y apache2"></a>sudo apt-get install -y apache2</h1><h1 id="SHELL"><a href="#SHELL" class="headerlink" title="SHELL"></a>SHELL</h1><p>4：端口映射（config.vm.network）网络为hostly－only时有效</p>
+<p>4.1 “forwarded_port”, guest: 3306, host: 3306</p>
+<p>当我们配置好Vargrantfile后。就可以启动vagrant了，仅需要轻轻敲下</p>
+<p><pre>vagrant up</pre><br>然后视机器性能等待启动。</p>
+<p>启动后有些常用的命令要说明</p>
+<p><pre>vagrant ssh //ssh到虚拟机上面去，其实这里我们可以使用自己的工具，账号密码都是vagrant。<br>vagrant reload  //重启虚拟机，重载配置，当你修改了vagrantfile的内容时需要使用。<br>vagrant halt //关闭虚拟机。<br>vagrant suspend  //挂起虚拟机<br>vagrant status  //查看虚拟机状态<br>vagrant destroy  //销毁虚拟机</pre><br><a id="more"></a></p>
+<p>介绍几个坑或者优化的地方</p>
+<p>Q：使用共享文件夹时出现文件权限的问题，提示权限不足。</p>
+<p>A：因为虚拟机挂载时采用了宿主机的默认权限，所以我们可以通过在配置里面制定挂载的权限。</p>
+<p><pre>config.vm.synced_folder “/Users/bob/Documents/code/“, “/var/www/“, :mount_options =&gt; [“dmode=755”,”fmode=644”]</pre><br>Q：访问速度很慢？？</p>
+<p>A：可以采用nfs挂载共享目录的形式。上面的权限问题也可以解决了。</p>
+<p><pre>config.vm.synced_folder “./www”, “/var/www”,type: “nfs”</pre><br>Q：运行时提示不能分配内存？？</p>
+<p>A：我曾经试过安装nginx的时候跳出这个问题，我free了一下，发现总内存果然很少。</p>
+<p>然后查了一下，默认分配的内存时512M，现在大家的内存都上4G了，我们可以考虑提高这个值。</p>
+<p><pre>config.vm.provider “virtualbox” do |vb|</pre></p>
+<h1 id="Display-the-VirtualBox-GUI-when-booting-the-machine"><a href="#Display-the-VirtualBox-GUI-when-booting-the-machine" class="headerlink" title="# Display the VirtualBox GUI when booting the machine"></a># Display the VirtualBox GUI when booting the machine</h1><h1 id="vb-gui-true"><a href="#vb-gui-true" class="headerlink" title="vb.gui = true"></a>vb.gui = true</h1><p> #</p>
+<h1 id="Customize-the-amount-of-memory-on-the-VM"><a href="#Customize-the-amount-of-memory-on-the-VM" class="headerlink" title="# Customize the amount of memory on the VM:"></a># Customize the amount of memory on the VM:</h1><p> vb.memory = “1024”<br> end<br>一定要注意删除注释的地方。</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/05/11/e5-88-9d-e5-85-a5vagrant/">http://superdjm.github.io/2016/05/11/e5-88-9d-e5-85-a5vagrant/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/05/19/vagrant-e5-ae-9e-e7-8e-b0mysql-e9-9b-86-e7-be-a4-ef-bc-88-e4-b8-bb-e4-bb-8e-e5-a4-8d-e5-88-b6-ef-bc-89/">  vagrant实现mysql集群（主从复制）</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/04/19/php-e8-80-97-e6-97-b6-e4-bb-bb-e5-8a-a1-e8-a7-a3-e5-86-b3-e6-96-b9-e6-a1-88/"> php耗时任务解决方案 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Wed May 11 2016 17:46:19 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

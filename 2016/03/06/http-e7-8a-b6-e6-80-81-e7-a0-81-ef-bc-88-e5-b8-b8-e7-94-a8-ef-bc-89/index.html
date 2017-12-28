@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            http状态码（常用）
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/"> 
+                    http状态码（常用） 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-06   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/杂记/">杂记</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <div>1XX 消息类型</div><br><div>101     Switching Protocols     在websocket通信用到</div><br><div></div><br><div>2XX成功</div><br><div>200     ok     表示成功，请求所希望的响应头或数据体将随此响应返回。</div><br><div>206     Partial Content      部分内容，只能用get，迅雷等下载工具断点续传。或者在线视频</div><br><div></div><br><div>3XX重定向</div><br><div>301     Moved Permanently     资源永久转移，新的location会被缓存</div><br><div>302     Found     资源临时转移，除非有制定缓存头，否则下次会继续向原有地址发送。</div><br><div><br><div>如果这不是一个GET或者HEAD请求，因此浏览器禁止自动进行重定向，除非得到用户的确认，因为请求的条件可能因此发生变化。</div><br><div><br><div>注意：对于某些使用HTTP/1.0协议的浏览器，当它们发送的POST请求得到了一个301响应的话，接下来的重定向请求将会变成GET方式</div><br></div><br></div><br><div>304     Not Modify     客户端的缓存资源是最新的。（要用户使用缓存）</div><br><div></div><br><div>4XX 客户端错误</div><br><div>400      Bad Request      由于包含<a href="https://zh.wikipedia.org/wiki/%E8%AF%AD%E6%B3%95" title="语法" target="_blank" rel="noopener">语法</a>错误，当前请求无法被服务器理解。</div><br><div>401     UnAuthorized     要求用户验证。该响应必须包含一个适用于被请求资源的WWW-Authenticate信息头用以询问用户信息。</div><br><div>403      Forbidden     禁止访问</div><br><div>404      Not Found     请求失败，请求所希望得到的资源未被在服务器上发现。</div><br><div>405     Method Not Allowed     服务器不支持使用的方法</div><br><div></div><br><div>5XX服务器错误</div><br><div>500      internal Server Error     服务器内部错误（程序语法错误）</div><br><div>501     Not Implemented     未实现的方法</div><br><div>502      Bad Gateway     无效的网关或代理</div><br><div>503     Services <span style="color: #252525; font-family: sans-serif;">Unavailable     服务器过载</span></div><br><div>504     Gateway Timeout     网关超时</div><br><div></div>
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/">http://superdjm.github.io/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/">  提高php性能的N种方法（一、Xcache）</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/03/wp-syntax-e4-bb-a3-e7-a0-81-e9-ab-98-e4-ba-ae-e6-8f-92-e4-bb-b6-e6-b5-8b-e8-af-95/"> （转）PHP新的垃圾回收机制:Zend GC详解 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sun Mar 06 2016 16:12:59 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

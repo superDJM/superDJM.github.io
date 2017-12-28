@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            vagrant实现mysql集群（主从复制）
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/05/19/vagrant-e5-ae-9e-e7-8e-b0mysql-e9-9b-86-e7-be-a4-ef-bc-88-e4-b8-bb-e4-bb-8e-e5-a4-8d-e5-88-b6-ef-bc-89/"> 
+                    vagrant实现mysql集群（主从复制） 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-05-19   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟化技术/">虚拟化技术</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>上次学会了vagrant的基本配置之后，我终于可以有机会去尝试我的php框架（RandomPHP）db的主从分离了，说是集群，我们在这里就开启两个拥有相同版本的mysql和nginx的虚拟机box来做。道理是一样的。</p>
+<p>用Vagrant实现集群启示很简单，只需要简单的配置一下Vagrantfile。</p>
+<p><pre> Vagrant.configure(2) do |config|</pre></p>
+<p>#config开头的配置会应用到所有虚拟机，即全局配置<br>  config.vm.synced_folder “~/Public/htdocs”, “/var/www”,type: “nfs”</p>
+<p>#这里用define定义我们的第一台虚拟机<br>  config.vm.define “web4” do |web4|</p>
+<p>#名称<br>    web4.vm.box = “centos”</p>
+<p>#web4的网络配置<br>    web4.vm.network “private_network”, ip: “192.168.50.4”<br>  end</p>
+<p>#第二台虚拟机的配置<br>  config.vm.define “web5” do |web5|<br>    web5.vm.box = “centos2”</p>
+<p>#这里要注意我们分配另外一个ip<br>    web5.vm.network “private_network”, ip: “192.168.50.5”<br>  end<br>end<br><br>到这里我们就完成配置保存，然后vagrant up。等待虚拟机都开启后，开始我们今天最重要的主从复制了。</p>
+<p>part1 主mysql</p>
+<p>进入web4，vagrant ssh web4 ，编辑/etc/my.cnf，在[mysqld]段（注意此处很重要）加入下面这一段</p>
+<p><pre>#开启二进制日志<br>log-bin=master-bin<br>log-bin-index=master-bin.index</pre></p>
+<p>#主服务器id，唯一，默认为1，一般取ip段的最后一位<br>server-id=5<br>然后我们进入mysql，输入show master status;查看状态.</p>
+<p><pre>mysql&gt; show master status;<br>+——————-+———-+————–+——————+——————-+<br>| File | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |<br>+——————-+———-+————–+——————+——————-+<br>| master-bin.000006 | 120 | | | |<br>+——————-+———-+————–+——————+——————-+<br>1 row in set (0.00 sec)</pre><br>记下这里的file名（master-bin.000006）,还有这里的position（120）是数据位偏移，也先记起来。</p>
+<p>然后为备份的从机创建复制帐号。</p>
+<p><pre>mysql&gt; grant replication slave on <em>.</em> to ‘repl’@’192.168.50.%’;<br>mysql&gt; exit</pre><br>part2 从服务器</p>
+<p>进入web5，vagrant ssh web5，先修改/etc/my.cnf,在[mysqld]增加下面这段</p>
+<p><pre>#从服务器不需要开启二进制日志</pre></p>
+<p>#从机的id<br>server-id=4<br>保存退出，然后进入mysql。</p>
+<p><pre>mysql&gt; change master to master_host=’192.168.50.4’,<br>     &gt; master_user=’repl’,<br>     &gt; master_password=’’,<br>     &gt; master_log_file=’master-bin.000006’,<br>     &gt; master_log_pos=0;//这里的偏移位如果是0的话，意味着开启复制线程，会先把之前存在的数据也复制过去。<br>mysql&gt; start slave;<br>mysql&gt; show slave status\G</pre></p>
+<p><pre>//主要观察到这两个值是yes，复制线程就正常工作了。<br> Slave_IO_Running: Yes<br> Slave_SQL_Running: Yes</pre><br>ps：如果跟随我的操作的话。应该会出现</p>
+<p><pre>Fatal error: The slave I/O thread stops because master and slave have equal MySQL server UUIDs; these UUIDs must be different for replication to work.<br></pre><br>找到原因在于，由于两个虚拟机的mysql是一摸一样的，把数据文件里面auto.cnf文件也拷贝过来了，里面记录了数据库的uuid，每个库的uuid应该是不一样的。</p>
+<p>所以我们这里可以选择删除这个文件或者更改里面的uuid值就可以了。</p>
+<p>我的mysql的data目录是/var/lib/mysql</p>
+<p><pre>rm -rf /var/lib/mysql/auto.cnf<br>service mysqld restart</pre><br>问题得以解决。然后我们就可以去测试主从复制了。</p>
+<p>到此，教程就结束了，其实用vagrant配置多台虚拟机来集群耗费的资源太多，本文仅作功能实现用，下次我将介绍用vagrant+docker实现集群，请期待。</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/05/19/vagrant-e5-ae-9e-e7-8e-b0mysql-e9-9b-86-e7-be-a4-ef-bc-88-e4-b8-bb-e4-bb-8e-e5-a4-8d-e5-88-b6-ef-bc-89/">http://superdjm.github.io/2016/05/19/vagrant-e5-ae-9e-e7-8e-b0mysql-e9-9b-86-e7-be-a4-ef-bc-88-e4-b8-bb-e4-bb-8e-e5-a4-8d-e5-88-b6-ef-bc-89/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/06/20/docker-e5-ae-b9-e5-99-a8ssh-e7-9b-b4-e8-bf-9e/">  docker容器ssh直连</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/05/11/e5-88-9d-e5-85-a5vagrant/"> 初入vagrant </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Thu May 19 2016 22:51:26 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            Redis-vs-Memcached-vs-MongoDB
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/08/16/redis-vs-memcached-vs-mongodb/"> 
+                    Redis-vs-Memcached-vs-MongoDB 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-08-16   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/nosql/">nosql</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#一、前言"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;&#x524D;&#x8A00;" class="headerlink" title="&#x4E00;&#x3001;&#x524D;&#x8A00;"></a>&#x4E00;&#x3001;&#x524D;&#x8A00;</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#二、正文"><span class="toc-list-text"><a href="#&#x4E8C;&#x3001;&#x6B63;&#x6587;" class="headerlink" title="&#x4E8C;&#x3001;&#x6B63;&#x6587;"></a>&#x4E8C;&#x3001;&#x6B63;&#x6587;</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#三、小结"><span class="toc-list-text"><a href="#&#x4E09;&#x3001;&#x5C0F;&#x7ED3;" class="headerlink" title="&#x4E09;&#x3001;&#x5C0F;&#x7ED3;"></a>&#x4E09;&#x3001;&#x5C0F;&#x7ED3;</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#四、摘录"><span class="toc-list-text"><a href="#&#x56DB;&#x3001;&#x6458;&#x5F55;" class="headerlink" title="&#x56DB;&#x3001;&#x6458;&#x5F55;"></a>&#x56DB;&#x3001;&#x6458;&#x5F55;</span></a></li></ol>
+</div>
+            <div class="content">
+                <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>redis、memcached、mongodb这个三个系统现在使用广泛。做一个后端工程师对他们必然要有一定的认识，下面我翻译了一个图表进行简单说明。</p>
+<h2 id="二、正文"><a href="#二、正文" class="headerlink" title="二、正文"></a>二、正文</h2><table width="100%"><br><tbody><br><tr><br><td class="attribute">名称</td><br><td class="header">Memcached</td><br><td class="header">MongoDB</td><br><td class="header">Redis</td><br></tr><br><tr><br><td class="attribute">简述</td><br><td class="value">全内存的kv存储, 最初设计用于缓存</td><br><td class="value">最流行的文档型数据库</td><br><td class="value">全内存的结构数据存储，可用于数据库，缓存，消息代理。<br><br>Redis专注于性能，所以它的很多设计都把高性能、低延迟放在第一位。</td><br></tr><br><tr><br><td class="attribute">数据库模型</td><br><td class="value">k-v 存储</td><br><td class="value">文档型数据库</td><br><td class="value">k-v存储<br><br>众多的数据类型、丰富的操作集、可配置的数据过期时间，历史数据回收和数据持久</td><br></tr><br><tr><br><td class="attribute"></td><br><td class="value"></td><br><td class="value"></td><br><td class="value"></td><br></tr><br><tr><br><td class="attribute">官网</td><br><td class="value"><a href="http://www.memcached.org/" target="_blank" rel="noopener">www.memcached.org</a></td><br><td class="value"><a href="http://www.mongodb.org/" target="_blank" rel="noopener">www.mongodb.org</a></td><br><td class="value"><a href="http://redis.io/" target="_blank" rel="noopener">redis.io</a></td><br></tr><br><tr><br><td class="attribute">技术文档</td><br><td class="value"><a href="https://github.com/memcached/memcached/wiki" target="_blank" rel="noopener">github.com/­memcached/­memcached/­wiki</a></td><br><td class="value"><a href="http://docs.mongodb.org/manual/" target="_blank" rel="noopener">docs.mongodb.org/­manual</a></td><br><td class="value"><a href="http://redis.io/documentation" target="_blank" rel="noopener">redis.io/­documentation</a></td><br></tr><br><tr><br><td class="attribute">开发者</td><br><td class="value">Danga Interactive</td><br><td class="value">MongoDB, Inc</td><br><td class="value">Salvatore Sanfilippo</td><br></tr><br><tr><br><td class="attribute">初次发布</td><br><td class="value">2003</td><br><td class="value">2009</td><br><td class="value">2009</td><br></tr><br><tr><br><td class="attribute">最新发行版</td><br><td class="value">1.4.29, July 2016</td><br><td class="value">3.2.8, July 2016</td><br><td class="value">3.2.3, August 2016</td><br></tr><br><tr><br><td class="attribute">证书</td><br><td class="value">BSD开源协议</td><br><td class="value">AGPL 第三版开源协议， 提供商业版证书</td><br><td class="value">BSD 3-条款，提供商业版证书</td><br></tr><br><tr><br><td class="attribute">数据库服务</td><br><td class="value">不提供</td><br><td class="value">不提供</td><br><td class="value">不提供</td><br></tr><br><tr><br><td class="attribute">实现语言</td><br><td class="value">C</td><br><td class="value">C++</td><br><td class="value">C</td><br></tr><br><tr><br><td class="attribute">支持的服务器端os</td><br><td class="value">FreeBSD<br>Linux<br>OS X<br>Unix<br>Windows</td><br><td class="value">Linux<br>OS X<br>Solaris<br>Windows</td><br><td class="value">BSD<br>Linux<br>OS X<br>Windows</td><br></tr><br><tr><br><td class="attribute">数据模式</td><br><td class="value">schema-free</td><br><td class="value">schema-free</td><br><td class="value">schema-free</td><br></tr><br><tr><br><td class="attribute">数据类型</td><br><td class="value">没有</td><br><td class="value">string, integer, double, boolean, date, object_id</td><br><td class="value">支持的数据类型：strings, hashes, lists, sets and sorted sets, bit arrays, hyperloglogs and geospatial indexes</td><br></tr><br><tr><br><td class="attribute">XML 支持</td><br><td class="value"></td><br><td class="value"></td><br><td class="value">不</td><br></tr><br><tr><br><td class="attribute">第二索引</td><br><td class="value">不支持</td><br><td class="value">支持</td><br><td class="value">不支持</td><br></tr><br><tr><br><td class="attribute">SQL</td><br><td class="value">no</td><br><td class="value">no</td><br><td class="value">no</td><br></tr><br><tr><br><td class="attribute">APIs 和其他通信协议</td><br><td class="value">专有协议</td><br><td class="value"> 使用 JSON</td><br><td class="value">专有协议</td><br></tr><br><tr><br><td class="attribute">客户端支持的语言</td><br><td class="value">.Net<br>C<br>C++<br>ColdFusion<br>Erlang<br>Java<br>Lisp<br>Lua<br>OCaml<br>Perl<br>PHP<br>Python<br>Ruby</td><br><td class="value">Actionscript （非官方）<br>C<br>C#<br>C++<br>Clojure（非官方）<br>ColdFusion（非官方）<br>D（非官方）<br>Dart（非官方）<br>Delphi（非官方）<br>Erlang<br>Go（非官方）<br>Groovy（非官方）<br>Haskell<br>Java<br>JavaScript<br>Lisp（非官方）<br>Lua（非官方）<br>MatLab（非官方）<br>Perl<br>PHP<br>PowerShell（非官方）<br>Prolog（非官方）<br>Python<br>R（非官方）<br>Ruby<br>Scala<br>Smalltalk （非官方）</td><br><td class="value">C<br>C#<br>C++<br>Clojure<br>Crystal<br>D<br>Dart<br>Elixir<br>Erlang<br>Fancy<br>Go<br>Haskell<br>Haxe<br>Java<br>JavaScript (Node.js)<br>Lisp<br>Lua<br>MatLab<br>Objective-C<br>OCaml（非官方）<br>Perl<br>PHP<br>Prolog<br>Pure Data<br>Python<br>R<br>Rebol<br>Ruby<br>Rust<br>Scala<br>Scheme<br>Smalltalk<br>Tcl</td><br></tr><br><tr><br><td class="attribute">服务器端脚本</td><br><td class="value">不支持</td><br><td class="value">JavaScript</td><br><td class="value">Lua</td><br></tr><br><tr><br><td class="attribute">触发器</td><br><td class="value">no</td><br><td class="value">no</td><br><td class="value">no</td><br></tr><br><tr><br><td class="attribute">分区方式</td><br><td class="value">没有分区</td><br><td class="value">分片</td><br><td class="value">分片</td><br></tr><br><tr><br><td class="attribute">副本方式</td><br><td class="value">Repcached（高可用方案）</td><br><td class="value">主从复制</td><br><td class="value">主从复制</td><br></tr><br><tr><br><td class="attribute">接入MapReduce</td><br><td class="value">不支持</td><br><td class="value">支持</td><br><td class="value">不支持</td><br></tr><br><tr><br><td class="attribute">一致性</td><br><td class="value"></td><br><td class="value">最终一致、实时一致</td><br><td class="value">最终一致</td><br></tr><br><tr><br><td class="attribute">外键</td><br><td class="value">不支持</td><br><td class="value">通常不使用</td><br><td class="value">不支持</td><br></tr><br><tr><br><td class="attribute">事务</td><br><td class="value">不支持</td><br><td class="value">在同一的Document里面提供原子性</td><br><td class="value">乐观锁，命令具有原子性</td><br></tr><br><tr><br><td class="attribute">并发</td><br><td class="value">支持</td><br><td class="value">支持</td><br><td class="value">支持，数据序列化存储</td><br></tr><br><tr><br><td class="attribute">持久化</td><br><td class="value">不支持</td><br><td class="value">支持（可选）</td><br><td class="value">支持（RDB、AOF）</td><br></tr><br><tr><br><td class="attribute">数据存在内存</td><br><td class="value"> 支持</td><br><td class="value">3.2以后支持</td><br><td class="value">支持</td><br></tr><br><tr><br><td class="attribute">用户鉴权</td><br><td class="value">使用 SASL (Simple Authentication and Security Layer) 协议</td><br><td class="value">基于角色的权限控制RBAC（Roles-based  Access Control）</td><br><td class="value">基于用户密码的认证，商业版支持ssl和访问控制</td><br></tr><br><tr><br><td class="headline" colspan="99"></td><br></tr><br></tbody><br></table>
+
+<h2 id="三、小结"><a href="#三、小结" class="headerlink" title="三、小结"></a>三、小结</h2><p>通过上面表格应该大致了解三个系统的大致区别，不过这只是皮毛，以后我会去更多去探讨他们在一致性，副本、持久化方面的实现来进一步了解他们的设计理念。</p>
+<h2 id="四、摘录"><a href="#四、摘录" class="headerlink" title="四、摘录"></a>四、摘录</h2><p>【1】<a href="http://db-engines.com/en/system/Memcached%3BMongoDB%3BRedis" target="_blank" rel="noopener">System Properties Comparison Memcached vs. MongoDB vs. Redis</a></p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/08/16/redis-vs-memcached-vs-mongodb/">http://superdjm.github.io/2016/08/16/redis-vs-memcached-vs-mongodb/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/08/18/redis-e5-90-84-e7-a7-8d-e6-95-b0-e6-8d-ae-e7-b1-bb-e5-9e-8b-e7-9a-84-e4-bd-bf-e7-94-a8-e5-9c-ba-e6-99-af/">  Redis各种数据类型的使用场景</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/07/28/e4-b8-80-e8-87-b4-e6-80-a7hash-e7-ae-97-e6-b3-95/"> 一致性Hash算法 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Tue Aug 16 2016 15:48:24 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

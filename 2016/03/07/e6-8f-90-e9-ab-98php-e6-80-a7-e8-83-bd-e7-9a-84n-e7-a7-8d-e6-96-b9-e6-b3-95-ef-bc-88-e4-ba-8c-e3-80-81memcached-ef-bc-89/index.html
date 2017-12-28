@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            提高php性能的N种方法（二、Memcached）
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/07/e6-8f-90-e9-ab-98php-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-ba-8c-e3-80-81memcached-ef-bc-89/"> 
+                    提高php性能的N种方法（二、Memcached） 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-07   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>惯例摘录百度百科对Memcached的描述。</p>
+<blockquote>
+<p>Memcached 是一个高性能的分布式内存对象缓存系统，用于动态Web应用以减轻数据库负载。它通过在内存中缓存数据和对象来减少读取数据库的次数，从而提高动态、数据库驱动网站的速度。Memcached基于一个存储键/值对的<a href="http://baike.baidu.com/view/1487140.htm" target="_blank" rel="noopener">hashmap</a>。其<a href="http://baike.baidu.com/view/53123.htm" target="_blank" rel="noopener">守护进程</a>（daemon ）是用<a href="http://baike.baidu.com/subview/10075/6770152.htm" target="_blank" rel="noopener">C</a>写的，但是客户端可以用任何语言来编写，并通过memcached协议与守护进程通信。<br>Memcached是基于键值对的hashmap，贮存于内存，只支持储存字符串类型，垃圾回收采用LRU（最近未使用算法），对小型静态数据进行缓存处理，尤其是html代码段，在处理元数据时所消耗的内存资源相对Redis（另外一个负盛名的键值数据存储方案。下次会讲到）更少。</p>
+</blockquote>
+<p>介绍完之后，说说他的安装和配置。</p>
+<p>分客户端和服务器端</p>
+<p>1、客户端（开启Memcached的php扩展）</p>
+<p>1）如果你的php包是使用yum（<strong>Redhat/Fedora/Centos</strong>）一键安装的。可以采用</p>
+<blockquote>
+<p>yum install php-pecl-memcache<br>进行安装（不建议）。</p>
+</blockquote>
+<p>2）pecl安装。这是第二简洁的方案。只要你熟悉使用pecl安装php的扩展的话。</p>
+<blockquote>
+<div>pecl install memcache</div>
+
+<div>yum install zlib-devel</div>
+
+<div>echo ‘extension=memcache.so’ &gt;&gt; /etc/php.ini</div><br><div>    3）从官网下载编译安装。以上两种方法均失败的话。就只能使用这个方法了，如下：</div><br><div><br><br><div>wget <a href="http://pecl.[php.net/get/memcache-2.2.7.tgz](http://php.net/get/memcache-2.2.7.tgz" target="_blank" rel="noopener">http://pecl.[php.net/get/memcache-2.2.7.tgz](http://php.net/get/memcache-2.2.7.tgz</a>)</div>
+
+<div>tar -zxvf memcache-2.2.7.tgzc</div>
+
+<p>cd memcache-2.2.7</p>
+<p>/usr/local/php/bin/phpize</p>
+<p>./configure –with-php-config=/usr/local/php/bin/php-config</p>
+<div>make &amp;&amp; make install</div>
+
+<div><br><br><br><strong>注意：</strong>/usr/local/php/ 为php的安装路径，需要根据你安装的实际目录调整。<br><br><br></div>
+
+<p></p></div><p></p>
+<p><div></div></p>
+<div>
+
+</div></blockquote>
+<p>安装成功后会显示你的memcache.so扩展的位置，比如我的：</p>
+<p><br></p>
+<div><br><div><br><pre>Installing shared extensions:/usr/local/php/lib/php/extensions/no-debug-non-zts-20090626/<br><br></pre><br></div><br></div><br><div><br><div><br><br>最后我们需要把这个扩展添加到php中，打开你的php.ini文件在最后添加以下内容：<br><br></div><br></div><br>&gt; <div><br>&gt;<br>&gt; <div><br>&gt;<br>&gt; <div>[Memcache]<br>&gt;<br>&gt; extension_dir = “/usr/local/php/lib/php/extensions/no-debug-non-zts-20090626/“<br>&gt;<br>&gt; <div>extension = memcache.so</div><br>&gt;<br>&gt; </div><br>&gt;<br>&gt; </div><br>&gt;<br>&gt; </div><br><div><br><div><br><div><br><div>最后重启服务器（Apache）</div><br>&gt; <div>/usr/local/apache2/bin/httpd －k restart</div><br></div><br></div><br></div><br>检查安装结果<br><pre>/usr/local/php/bin/php -m | grep memcache<br><br></pre><br><div><br><div>安装成功会输出：memcache。</div><br><div></div><br><div>2、安装服务器端</div><br></div><br><div><br><div>    1）Linux系统安装memcached，首先要先安装lib event库。</div><br><div><br>&gt; <div><br>&gt;<br>&gt;<br>&gt; sudo apt-get install libevent libevent-devel          自动下载安装（Ubuntu/Debian）<br>&gt;<br>&gt; <div>yum install libevent libevent-devel                      自动下载安装（Redhat/Fedora/Centos）</div><br>&gt;<br>&gt; </div><br><div><br><br>    2）安装Memcached<strong>Ubuntu/Debian</strong><br><pre>sudo apt-get install memcached<br></pre><br><strong>Redhat/Fedora/Centos</strong><br><pre>yum install memcached</pre><br></div><br><div><br><br><strong>3）启动选项：</strong><br><br><em>   -d是启动一个守护进程；
+</em>   -m是分配给Memcache使用的内存数量，单位是MB；<br><em>   -u是运行Memcache的用户；
+</em>   -l是监听的服务器IP地址，可以有多个地址；<br><em>   -p是设置Memcache监听的端口，，最好是1024以上的端口；
+</em>   -c是最大运行的并发连接数，默认是1024；<br>*   -P是设置保存Memcache的pid文件。<br></div><br><div><br><div></div><br>&gt; <div>/usr/local/memcached/bin/memcached -p 11211 -m 64m -d -u root</div><br></div><br></div><br></div>
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/07/e6-8f-90-e9-ab-98php-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-ba-8c-e3-80-81memcached-ef-bc-89/">http://superdjm.github.io/2016/03/07/e6-8f-90-e9-ab-98php-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-ba-8c-e3-80-81memcached-ef-bc-89/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/12/psr-e7-b3-bb-e5-88-97/">  PSR系列 Proposing a Standards Recommendation（提出标准建议）</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/"> 提高php性能的N种方法（一、Xcache） </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Mon Mar 07 2016 19:56:57 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

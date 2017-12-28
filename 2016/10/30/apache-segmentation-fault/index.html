@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            apache segmentation fault
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/10/30/apache-segmentation-fault/"> 
+                    apache segmentation fault 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-10-30   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/杂记/">杂记</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>今天外包的一个项目突然崩了，显示“服务器未发送任何数据”（<strong>err empty response</strong>），之前遇到这种情况一般是自己的代码写错了，然后<strong>没有正常输出数据</strong>。但是代码上线一年多，而且都由我来维护，不可能是代码的问题。</p>
+<p>首先ping域名发现ip是对的而且能ping通，那就排除了服务器域名dns的问题。</p>
+<p>然后登上服务器，第一步先用<strong>top</strong>，发现负载为0，内存、io也木有问题。</p>
+<p>第二步检查一下apache的状态，发现进程正常运行，端口也正常绑定。所以直接先重启apache。</p>
+<pre><code>ps aux | grep &quot;httpd&quot;//查看进程
+
+netstat -an | grep &quot;:80&quot;//查看网络监听
+
+/etc/init.d/httpd restart //重启apache`&lt;/pre&gt;
+然后网站就能正常访问了。**基本确定是apache的问题了。**
+
+于是第三步从apache的日志入手。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`tail -f /etc/httpd/logs/error_log
+`&lt;/pre&gt;
+结果如下图，出现一大堆的segmentation fault，也是本文的标题。
+
+[![apache segmentation fault](http://blog.djmgod.cn/wp-content/uploads/2016/10/QQ图片20161030204012-300x82.png)](http://blog.djmgod.cn/2016/10/apache-segmentation-fault.html/qq%e5%9b%be%e7%89%8720161030204012)
+
+上网google了一下，比较靠谱的说法是因为**php的zend模块**引起的。
+
+我确实部署了一个xcache来加速php，于是去他的bug report里面找，终于发现有类似的bug爆出。**还发现使用了加速php这类的zend扩展都会有引起apache段错误的问题**。
+
+最后我**卸载了xcache**，然后业务暂时回复正常。
+
+**我的思考：**由于xcache+PHP+Apache这个方案已经运行了一年多了，期间也只是出现xcache的oom问题，所以我怀疑问题可能不是出自xcache，或者还有其他的原因，如果要追根到底的话，可以对httpd进行调试，由于是线上环境，而且我的空余时间不是很多，就没有再去尝试了。读者可以自己检验。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`gdb httpd
+</code></pre>
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/10/30/apache-segmentation-fault/">http://superdjm.github.io/2016/10/30/apache-segmentation-fault/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2017/01/06/make-gitignore-e7-ab-8b-e5-8d-b3-e7-94-9f-e6-95-88/">  Make the .gitignore file work immediately</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/10/07/static-e7-9a-84-e4-bd-9c-e7-94-a8/"> static的作用 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sun Oct 30 2016 21:11:55 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

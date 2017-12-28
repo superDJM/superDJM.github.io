@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            node.js 热部署（监听文件修改自动重启node服务）
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/07/25/node-js-e7-83-ad-e9-83-a8-e7-bd-b2-ef-bc-88-e7-9b-91-e5-90-ac-e6-96-87-e4-bb-b6-e4-bf-ae-e6-94-b9-e8-87-aa-e5-8a-a8-e9-87-8d-e5-90-afnode-e6-9c-8d-e5-8a-a1-ef-bc-89/"> 
+                    node.js 热部署（监听文件修改自动重启node服务） 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-07-25   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/node-js/">node.js</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#一、前言"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;&#x524D;&#x8A00;" class="headerlink" title="&#x4E00;&#x3001;&#x524D;&#x8A00;"></a>&#x4E00;&#x3001;&#x524D;&#x8A00;</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#二、工具介绍"><span class="toc-list-text"><a href="#&#x4E8C;&#x3001;&#x5DE5;&#x5177;&#x4ECB;&#x7ECD;" class="headerlink" title="&#x4E8C;&#x3001;&#x5DE5;&#x5177;&#x4ECB;&#x7ECD;"></a>&#x4E8C;&#x3001;&#x5DE5;&#x5177;&#x4ECB;&#x7ECD;</span></a><ol class="toc-list-child"><li class="toc-list-item toc-list-level-3"><a class="toc-list-link" href="#一、supervisor"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;supervisor" class="headerlink" title="&#x4E00;&#x3001;supervisor"></a>&#x4E00;&#x3001;supervisor</span></a></li></ol></li></ol>
+</div>
+            <div class="content">
+                <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>在写php的时候，代码更改，也不用去重启我们的webServer，想dump个什么东西，在线上都能做。</p>
+<p>刚接触node，每一次更改代码都要重启node服务。大大降低了工作效率。</p>
+<p>这是因为 Node.js 只有在第一次引用到某部份时才会去解析脚本文件，以后都会直接访问内存，避免重复载入，而 PHP 则总是重新读取并解析脚本(如果没有专门的优化配置)。Node.js的这种设计虽然有利于提高性能，却不利于开发调试，因为我们在开发过程中总是希望修改后立即看到效果，而不是每次都要终止进程并重启。</p>
+<p>这时若你修改了js文件，或是调试功能，或是增加功能。这时需要重新发布该服务，每次修改都需要执行以下两步：</p>
+<p>1 control+c</p>
+<p>2 node server.js</p>
+<p>很不爽！因此有人开发了一个自动发布（热发布）的工具，你只需要在修改文件后保存，它就能自动替你发布，这就是所谓的热部署。就像tomcat或websphere等一些主流的web应用服务器那样保存即热部署。下面将介绍几个NodeJS中的开源热部署工具。</p>
+<h2 id="二、工具介绍"><a href="#二、工具介绍" class="headerlink" title="二、工具介绍"></a>二、工具介绍</h2><h3 id="一、supervisor"><a href="#一、supervisor" class="headerlink" title="一、supervisor"></a>一、supervisor</h3><p>跟docker的进程管理工具名字一样有木有。</p>
+<pre><code>Node Supervisor is used to restart programs when they crash.
+It can also be used to restart programs when a *.js file changes.`&lt;/pre&gt;
+supervisor是用于node进程崩溃时重启node，它也可以用于监听后缀为js文件的改变而重启node。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`//全局安装supervisor
+npm install -g supervisor
+//执行命令
+supervisor server.js`&lt;/pre&gt;
+然后我们就可以愉快地更改代码了。不过这个工具有一个特点。当你的代码不能启动的时候，你的console台就会不断刷出报错的信息，因为他失败重试启动node服务的间隔很短，且没有错误次数累计。
+
+有一个比较重要的参数，可以设置什么时候不重启node。
+&lt;pre&gt;`-n|--no-restart-on error|exit|success
+    Don&#39;t automatically restart the supervised program if it ends.
+    Supervisor will wait for a change in the source files.
+    If &quot;error&quot;, an exit code of 0 will still restart.
+    If &quot;exit&quot;, no restart regardless of exit code.
+    If &quot;success&quot;, no restart only if exit code is 0.`&lt;/pre&gt;
+
+### 二、hotnode
+
+这个工具与supervisor的用法是一样的。
+
+然后它会在重启时打出一条日志说明是哪几个文件产生了修改。
+
+### 三、forever
+
+github地址： [https://github.com/nodejitsu/forever](https://github.com/nodejitsu/forever)
+
+forever是一个简单的命令式nodejs的守护进程，能够启动，停止，重启App应用。forever完全基于命令行操作，在forever进程之下，创建node的子进程，通过monitor监控node子进程的运行情况，一旦文件更新或进程挂掉，forever会自动重启node服务器，确保应用正常运行。
+&lt;pre&gt;`//全局安装
+npm install forever -g 
+//启动       
+forever start app.js 
+//关闭         
+forever stop app.js           
+//输出日志和错误
+forever start -l forever.log -o out.log -e err.log app.js
+//自动监控文件变化，文件修改保存之后自动重启app.js      
+forever -w app.js  
+//查看帮助           
+forever -h   `&lt;/pre&gt;
+前面的supervisor和hotnode都有一个严重的问题，无论是用nohup或者在命令最后加上&amp;amp;也不能保持后台持续运行，一旦ssh断开了，程序也就关闭了。亲测forever很好用，既能keeplive也可以热部署。
+
+### 四、pm2（支持node集群）
+
+github地址：[https://github.com/Unitech/pm2](https://github.com/Unitech/pm2)
+告别node-forever，拥抱pm2: [http://se77en.cc/2013/06/27/goodbye-node-forever-hello-pm2-translation/](http://se77en.cc/2013/06/27/goodbye-node-forever-hello-pm2-translation/)
+&lt;pre&gt;`npm install -g pm2
+pm2 start app.js -i max //启动一个使用所有CPU核心的集群
+pm2 list  //列出所有pm2开启的进程
+pm2 monit
+pm2 logs //打印日志`&lt;/pre&gt;
+看上去很强大，没有用过。mark。
+
+### 五、grunt
+
+今天看慕课发现使用grunt也可以达到自动部署的作用。
+
+首先安装这几个包
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`npm install grunt -g
+npm install grunt-cli -g
+npm install grunt-contrib-watch --save-dev
+npm install grunt-nodemon --save-dev
+npm install grunt-concurrent --save-dev`&lt;/pre&gt;
+
+`grunt-contrib-watch 是用于监视文件变化重启node服务的。`
+
+`grunt-nodemon是用于后台运行node的。`
+
+`grunt-concurrent适用于grunt插件的并行运行。`
+
+然后参考一下配置文件gruntfile.js
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`module.exports = function(grunt) {
+
+  grunt.initConfig({
+    watch: {
+     //监听的项目
+      jade: {
+        files: [&#39;views/**&#39;],
+        options: {
+          livereload: true
+        }
+      },
+      js: {
+        files: [&#39;public/js/**&#39;, &#39;models/**/*.js&#39;, &#39;schemas/**/*.js&#39;],
+        //tasks: [&#39;jshint&#39;],
+        options: {
+          livereload: true
+        }
+      }
+  },
+
+  nodemon: {
+      dev: {
+        options: {
+         //后台守护的进程
+          file: &#39;bin/www&#39;,
+          args: [],
+          ignoredFiles: [&#39;README.md&#39;, &#39;node_modules/**&#39;, &#39;.DS_Store&#39;],
+          watchedExtensions: [&#39;js&#39;],
+          watchedFolders: [&#39;./&#39;],
+          debug: true,
+          delayTime: 1,
+          env: {
+            PORT: 3000
+          },
+          cwd: __dirname
+        }
+      }
+    },
+
+    concurrent: {
+      tasks: [&#39;nodemon&#39;, &#39;watch&#39;],
+      options: {
+        logConcurrentOutput: true
+      }
+    }
+  })
+
+  grunt.loadNpmTasks(&#39;grunt-contrib-watch&#39;)
+  grunt.loadNpmTasks(&#39;grunt-nodemon&#39;)
+  grunt.loadNpmTasks(&#39;grunt-concurrent&#39;)
+
+  grunt.option(&#39;force&#39;, true)
+  grunt.registerTask(&#39;default&#39;, [&#39;concurrent&#39;])
+}
+</code></pre><p>最后在项目目录输入grunt。搞掂。</p>
+<p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/07/25/node-js-e7-83-ad-e9-83-a8-e7-bd-b2-ef-bc-88-e7-9b-91-e5-90-ac-e6-96-87-e4-bb-b6-e4-bf-ae-e6-94-b9-e8-87-aa-e5-8a-a8-e9-87-8d-e5-90-afnode-e6-9c-8d-e5-8a-a1-ef-bc-89/">http://superdjm.github.io/2016/07/25/node-js-e7-83-ad-e9-83-a8-e7-bd-b2-ef-bc-88-e7-9b-91-e5-90-ac-e6-96-87-e4-bb-b6-e4-bf-ae-e6-94-b9-e8-87-aa-e5-8a-a8-e9-87-8d-e5-90-afnode-e6-9c-8d-e5-8a-a1-ef-bc-89/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/07/25/mongoose-e5-9c-a8-e5-88-9b-e5-bb-bamodel-e6-97-b6-e5-af-b9collection-e7-9a-84-e5-91-bd-e5-90-8d-e7-ad-96-e7-95-a5/">  Mongoose在创建Model时对Collection的命名策略</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/07/19/kafka-e5-88-9d-e6-8e-a2/"> kafka初探 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Mon Jul 25 2016 18:01:18 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

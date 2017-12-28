@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            我的php mvc之路系列(一)
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/26/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-b8-80/"> 
+                    我的php mvc之路系列(一) 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-26   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mvc框架/">mvc框架</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>今天我想分享部分的是 <strong>路由调度。</strong></p>
+<p>我们采取的url模式是index.php/module/controller/method/param1/value1.html</p>
+<p>用的是/做参数分割。先上代码。</p>
+<pre><code>        $param = Array();
+        $uri = isset($_SERVER[&#39;PATH_INFO&#39;]) ? $_SERVER[&#39;PATH_INFO&#39;] : &#39;&#39;;   //使用path_info模式
+        if (!isset($_SERVER[&#39;PATH_INFO&#39;]) &amp;amp;&amp;amp; !DEBUG) {
+            throw new \Exception(&quot;系统不支持path_info&quot;);
+        }`&lt;/pre&gt;
+&amp;nbsp;
+
+我们首先要关注$_SERVER[&#39;path_info&#39;]这全局变量。你可以把这个把这个变量理解为脚本路径之后的字符串。举一个栗子。
+&gt; http://localhost/RandomPHP/Web/Home/Home/index/id/2/name/jack.html
+因为我的服务器开启了apache改写规则，我们其实是省略了index.php脚本文件。
+
+$_SERVER[path_info] = &quot;/Home/Home/index/id/2/name/jack.html&quot;;
+
+贴一下apache改写的代码
+&lt;pre&gt;&amp;lt;IfModule mod_rewrite.c&amp;gt;
+  Options +FollowSymlinks
+  RewriteEngine On
+
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^(.*)$ index.php/$1 [QSA]
+&amp;lt;/IfModule&amp;gt;&lt;/pre&gt;
+这里大家可以通过下面这个链接去了解一下apache改写的知识。
+
+**QSA**(query string append) 追加请求字符串
+
+[关于Apache mod_rewrite的中文配置、使用和语法介绍（实现URL重写和防盗链功能）](http://chinablog.blog.51cto.com/276793/280278)
+
+获取到了path_info之后了。我们就要用‘/’这个作为分隔符，把path_info分割成4个数组。
+
+在这之前我们要先把.html伪静态字符先去掉，然后用explode进行字符串分割，注意这里的第三个参数，这个参数控制分割之后的数组个数，然后假如需要分割的元素大于数组个数的话，最后一个数组将会存储剩下的字符串。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`//伪静态处理
+        if (false !== $pos = strpos($uri, &#39;.&#39;)) {
+            $config = Register::get(&#39;config&#39;);
+            if (substr($uri, $pos + 1) != $config[&#39;suffix&#39;]) {
+                throw new \Exception(&quot;suffix is not supported&quot;);
+            } else {
+                $uri = substr($uri, 0, $pos);
+            }
+        }
+
+        //参数分解
+        $request = explode(&#39;/&#39;, trim($uri, &#39;/&#39;), 4);`&lt;/pre&gt;
+然后判断数组的元素个数，如果小于3的话，说明参数没有传够，我们这里统一把它定位到/homr/home/index。作为我们框架的默认页面。
+
+个数大于3的话，那说明还传进了参数。我们需要再次切割这些 参数，把他们解析成key＝value的关联数组和$_GET合并。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`//不规范的url,统一定位到Home/Home/index
+        if (count($request) &amp;lt; 3) {
+            return array(&#39;Home&#39;, &#39;Home&#39;, &#39;index&#39;);
+        } elseif (count($request) &amp;gt; 3) {
+            //get Param
+            preg_replace_callback(&#39;/([^\/]+)\/([^\/]+)/&#39;, function ($match) use (&amp;amp;$param) {
+                $param[strtolower($match[1])] = strip_tags($match[2]);
+            }, array_pop($request));
+
+            //把param加入到$_GET
+            $_GET = array_merge($param, $_GET);
+        }`&lt;/pre&gt;
+这里的preg_replace_callback($pattern,$function,$string); 第一个是正则表达式，第二个参数函数名或者匿名函数，在函数里面实现replace的操作，第三个参数是要操作的字符串。
+
+array_pop弹出数组的最后一个元素($request[3]＝‘id/2/name/jack’)作为操作的字符串。每一次匹配一组（xx）/（xx）,然后把匹配数组$match传入回调函数。
+
+这个$match的内容是
+
+$match = array(
+
+[0]=&amp;gt;&#39;id/2&#39;，  //整个字符串
+
+[1]=&amp;gt;&#39;id&#39;，
+
+[2]=&amp;gt;&#39;2&#39;
+
+);
+
+然后在回调函数里面我们构造$var[&#39;$match[1]&#39;] = $match[2];
+
+这样我们就得到了我们要的$var[&#39;id&#39;] = 2;
+
+最后用array_merge讲$var和$_GET进行合并。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`//get Module
+        $router[] = ucwords(array_shift($request));
+
+        //get Controller
+        $router[] = ucwords(array_shift($request));
+
+        //get Method
+        $router[] = array_shift($request);`&lt;/pre&gt;
+&amp;nbsp;
+
+最后把$request里面的module和controller都进行首字母大写处理。加入到router数组。返回。
+
+最后贴出完整代码。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+/**
+ * Created by PhpStorm.
+ * User: dengjiaming
+ * Date: 23/3/2016
+ * Time: 下午3:47
+ */
+
+namespace Random;
+
+class Router
+{
+    /**
+     * @author DJM &amp;lt;op87960@gmail.com&amp;gt;
+     * @todo url解析
+     */
+    static function parseUrl()
+    {
+        //        $uri = $_SERVER[&#39;SCRIPT_NAME&#39;];
+        $param = Array();
+        $uri = isset($_SERVER[&#39;PATH_INFO&#39;]) ? $_SERVER[&#39;PATH_INFO&#39;] : &#39;&#39;;   //使用path_info模式
+        if (!isset($_SERVER[&#39;PATH_INFO&#39;]) &amp;amp;&amp;amp; !DEBUG) {
+            throw new \Exception(&quot;系统不支持path_info&quot;);
+        }
+
+        //伪静态处理
+        if (false !== $pos = strpos($uri, &#39;.&#39;)) {
+            $config = Register::get(&#39;config&#39;);
+            if (substr($uri, $pos + 1) != $config[&#39;suffix&#39;]) {
+                throw new \Exception(&quot;suffix is not supported&quot;);
+            } else {
+                $uri = substr($uri, 0, $pos);
+            }
+        }
+
+        //参数分解
+        $request = explode(&#39;/&#39;, trim($uri, &#39;/&#39;), 4);
+
+        //不规范的url,统一定位到Home/Home/index
+        if (count($request) &amp;lt; 3) {
+            return array(&#39;Home&#39;, &#39;Home&#39;, &#39;index&#39;);
+        } elseif (count($request) &amp;gt; 3) {
+            //get Param
+            preg_replace_callback(&#39;/([^\/]+)\/([^\/]+)/&#39;, function ($match) use (&amp;amp;$param) {
+                $param[strtolower($match[1])] = strip_tags($match[2]);
+            }, array_pop($request));
+
+            //把param加入到$_GET
+            $_GET = array_merge($param, $_GET);
+        }
+
+        //get Module
+        $router[] = ucwords(array_shift($request));
+
+        //get Controller
+        $router[] = ucwords(array_shift($request));
+
+        //get Method
+        $router[] = array_shift($request);
+
+        return $router;
+    }
+}
+</code></pre><p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/26/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-b8-80/">http://superdjm.github.io/2016/03/26/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-b8-80/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/04/02/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-ba-8c-e9-85-8d-e7-bd-ae-e5-8a-a0-e8-bd-bd-e7-b1-bb/">  我的php mvc之路系列(二) 配置加载类</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/19/memcached-e5-af-b9key-e5-92-8cvalue-e7-9a-84-e9-99-90-e5-88-b6/"> Memcached对key和value的限制 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sat Mar 26 2016 22:37:36 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

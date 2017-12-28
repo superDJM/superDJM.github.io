@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            LEARN
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <section class="posts">
+    
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/13/psr4-e8-87-aa-e5-8a-a8-e5-8a-a0-e8-bd-bdautoload-e5-a2-9e-e5-bc-ba-e7-89-88/"> 
+                    PSR4 自动加载(autoload)增强版 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-13   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>PSR4是对PSR0的补充，基本可以替代PSR0了。</p>
+<p>我简单说下，主要是以下几点：<br>1. 废除了PSR-0中<code>_</code>就是目录分割符的写法，<code>_</code>下划线在完全限定类名中是没有特殊含义了。<br>2. 类文件名要以 .php 结尾。<br>3. 类名必须要和对应的文件名要一模一样，大小写也要一模一样。</p>
+<p>给出一些link大家去参详一下。我也不是太懂。哈哈</p>
+<p><a href="http://segmentfault.com/a/1190000000380008" target="_blank" rel="noopener">http://segmentfault.com/a/1190000000380008</a><br><a href="http://www.4wei.cn/archives/1002186" target="_blank" rel="noopener">http://www.4wei.cn/archives/1002186</a><br><a href="http://wenku.baidu.com/view/7a21e44b48d7c1c708a14577.html#10002-tsina-1-87843-e29b4784eda5d1f51fb0c2a97a15da08" target="_blank" rel="noopener">http://wenku.baidu.com/view/7a21e44b48d7c1c708a14577.html#10002-tsina-1-87843-e29b4784eda5d1f51fb0c2a97a15da08</a><br><a href="https://github.com/hfcorriez/fig-standards" target="_blank" rel="noopener">https://github.com/hfcorriez/fig-standards</a></p>
+<p>最后贴出官方的例子。</p>
+<h2 id="Closure-Example"><a href="#Closure-Example" class="headerlink" title="Closure Example"></a>Closure Example</h2><pre><code>&amp;lt;?php
+/**
+ * An example of a project-specific implementation.
+ * 
+ * After registering this autoload function with SPL, the following line
+ * would cause the function to attempt to load the \Foo\Bar\Baz\Qux class
+ * from /path/to/project/src/Baz/Qux.php:
+ * 
+ *      new \Foo\Bar\Baz\Qux;
+ *      
+ * @param string $class The fully-qualified class name.
+ * @return void
+ */
+spl_autoload_register(function ($class) {
+
+    // project-specific namespace prefix
+    $prefix = &#39;Foo\\Bar\\&#39;;
+
+    // base directory for the namespace prefix
+    $base_dir = __DIR__ . &#39;/src/&#39;;
+
+    // does the class use the namespace prefix?
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        // no, move to the next registered autoloader
+        return;
+    }
+
+    // get the relative class name
+    $relative_class = substr($class, $len);
+
+    // replace the namespace prefix with the base directory, replace namespace
+    // separators with directory separators in the relative class name, append
+    // with .php
+    $file = $base_dir . str_replace(&#39;\\&#39;, &#39;/&#39;, $relative_class) . &#39;.php&#39;;
+
+    // if the file exists, require it
+    if (file_exists($file)) {
+        require $file;
+    }
+});`&lt;/pre&gt;
+&amp;nbsp;
+
+## Class Example
+
+&amp;nbsp;
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+namespace Example;
+
+/**
+ * An example of a general-purpose implementation that includes the optional
+ * functionality of allowing multiple base directories for a single namespace
+ * prefix.
+ * 
+ * Given a foo-bar package of classes in the file system at the following
+ * paths ...
+ * 
+ *     /path/to/packages/foo-bar/
+ *         src/
+ *             Baz.php             # Foo\Bar\Baz
+ *             Qux/
+ *                 Quux.php        # Foo\Bar\Qux\Quux
+ *         tests/
+ *             BazTest.php         # Foo\Bar\BazTest
+ *             Qux/
+ *                 QuuxTest.php    # Foo\Bar\Qux\QuuxTest
+ * 
+ * ... add the path to the class files for the \Foo\Bar\ namespace prefix
+ * as follows:
+ * 
+ *      &amp;lt;?php
+ *      // instantiate the loader
+ *      $loader = new \Example\Psr4AutoloaderClass;
+ *      
+ *      // register the autoloader
+ *      $loader-&amp;gt;register();
+ *      
+ *      // register the base directories for the namespace prefix
+ *      $loader-&amp;gt;addNamespace(&#39;Foo\Bar&#39;, &#39;/path/to/packages/foo-bar/src&#39;);
+ *      $loader-&amp;gt;addNamespace(&#39;Foo\Bar&#39;, &#39;/path/to/packages/foo-bar/tests&#39;);
+ * 
+ * The following line would cause the autoloader to attempt to load the
+ * \Foo\Bar\Qux\Quux class from /path/to/packages/foo-bar/src/Qux/Quux.php:
+ * 
+ *      &amp;lt;?php
+ *      new \Foo\Bar\Qux\Quux;
+ * 
+ * The following line would cause the autoloader to attempt to load the 
+ * \Foo\Bar\Qux\QuuxTest class from /path/to/packages/foo-bar/tests/Qux/QuuxTest.php:
+ * 
+ *      &amp;lt;?php
+ *      new \Foo\Bar\Qux\QuuxTest;
+ */
+class Psr4AutoloaderClass
+{
+    /**
+     * An associative array where the key is a namespace prefix and the value
+     * is an array of base directories for classes in that namespace.
+     *
+     * @var array
+     */
+    protected $prefixes = array();
+
+    /**
+     * Register loader with SPL autoloader stack.
+     * 
+     * @return void
+     */
+    public function register()
+    {
+        spl_autoload_register(array($this, &#39;loadClass&#39;));
+    }
+
+    /**
+     * Adds a base directory for a namespace prefix.
+     *
+     * @param string $prefix The namespace prefix.
+     * @param string $base_dir A base directory for class files in the
+     * namespace.
+     * @param bool $prepend If true, prepend the base directory to the stack
+     * instead of appending it; this causes it to be searched first rather
+     * than last.
+     * @return void
+     */
+    public function addNamespace($prefix, $base_dir, $prepend = false)
+    {
+        // normalize namespace prefix
+        $prefix = trim($prefix, &#39;\\&#39;) . &#39;\\&#39;;
+
+        // normalize the base directory with a trailing separator
+        $base_dir = rtrim($base_dir, DIRECTORY_SEPARATOR) . &#39;/&#39;;
+
+        // initialize the namespace prefix array
+        if (isset($this-&amp;gt;prefixes[$prefix]) === false) {
+            $this-&amp;gt;prefixes[$prefix] = array();
+        }
+
+        // retain the base directory for the namespace prefix
+        if ($prepend) {
+            array_unshift($this-&amp;gt;prefixes[$prefix], $base_dir);
+        } else {
+            array_push($this-&amp;gt;prefixes[$prefix], $base_dir);
+        }
+    }
+
+    /**
+     * Loads the class file for a given class name.
+     *
+     * @param string $class The fully-qualified class name.
+     * @return mixed The mapped file name on success, or boolean false on
+     * failure.
+     */
+    public function loadClass($class)
+    {
+        // the current namespace prefix
+        $prefix = $class;
+
+        // work backwards through the namespace names of the fully-qualified
+        // class name to find a mapped file name
+        while (false !== $pos = strrpos($prefix, &#39;\\&#39;)) {
+
+            // retain the trailing namespace separator in the prefix
+            $prefix = substr($class, 0, $pos + 1);
+
+            // the rest is the relative class name
+            $relative_class = substr($class, $pos + 1);
+
+            // try to load a mapped file for the prefix and relative class
+            $mapped_file = $this-&amp;gt;loadMappedFile($prefix, $relative_class);
+            if ($mapped_file) {
+                return $mapped_file;
+            }
+
+            // remove the trailing namespace separator for the next iteration
+            // of strrpos()
+            $prefix = rtrim($prefix, &#39;\\&#39;);   
+        }
+
+        // never found a mapped file
+        return false;
+    }
+
+    /**
+     * Load the mapped file for a namespace prefix and relative class.
+     * 
+     * @param string $prefix The namespace prefix.
+     * @param string $relative_class The relative class name.
+     * @return mixed Boolean false if no mapped file can be loaded, or the
+     * name of the mapped file that was loaded.
+     */
+    protected function loadMappedFile($prefix, $relative_class)
+    {
+        // are there any base directories for this namespace prefix?
+        if (isset($this-&amp;gt;prefixes[$prefix]) === false) {
+            return false;
+        }
+
+        // look through base directories for this namespace prefix
+        foreach ($this-&amp;gt;prefixes[$prefix] as $base_dir) {
+
+            // replace the namespace prefix with the base directory,
+            // replace namespace separators with directory separators
+            // in the relative class name, append with .php
+            $file = $base_dir
+                  . str_replace(&#39;\\&#39;, &#39;/&#39;, $relative_class)
+                  . &#39;.php&#39;;
+
+            // if the mapped file exists, require it
+            if ($this-&amp;gt;requireFile($file)) {
+                // yes, we&#39;re done
+                return $file;
+            }
+        }
+
+        // never found it
+        return false;
+    }
+
+    /**
+     * If a file exists, require it from the file system.
+     * 
+     * @param string $file The file to require.
+     * @return bool True if the file exists, false if not.
+     */
+    protected function requireFile($file)
+    {
+        if (file_exists($file)) {
+            require $file;
+            return true;
+        }
+        return false;
+    }
+}`&lt;/pre&gt;
+&amp;nbsp;
+
+### Unit Tests
+
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+namespace Example\Tests;
+
+class MockPsr4AutoloaderClass extends Psr4AutoloaderClass
+{
+    protected $files = array();
+
+    public function setFiles(array $files)
+    {
+        $this-&amp;gt;files = $files;
+    }
+
+    protected function requireFile($file)
+    {
+        return in_array($file, $this-&amp;gt;files);
+    }
+}
+
+class Psr4AutoloaderClassTest extends \PHPUnit_Framework_TestCase
+{
+    protected $loader;
+
+    protected function setUp()
+    {
+        $this-&amp;gt;loader = new MockPsr4AutoloaderClass;
+
+        $this-&amp;gt;loader-&amp;gt;setFiles(array(
+            &#39;/vendor/foo.bar/src/ClassName.php&#39;,
+            &#39;/vendor/foo.bar/src/DoomClassName.php&#39;,
+            &#39;/vendor/foo.bar/tests/ClassNameTest.php&#39;,
+            &#39;/vendor/foo.bardoom/src/ClassName.php&#39;,
+            &#39;/vendor/foo.bar.baz.dib/src/ClassName.php&#39;,
+            &#39;/vendor/foo.bar.baz.dib.zim.gir/src/ClassName.php&#39;,
+        ));
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar&#39;,
+            &#39;/vendor/foo.bar/src&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar&#39;,
+            &#39;/vendor/foo.bar/tests&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\BarDoom&#39;,
+            &#39;/vendor/foo.bardoom/src&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar\Baz\Dib&#39;,
+            &#39;/vendor/foo.bar.baz.dib/src&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar\Baz\Dib\Zim\Gir&#39;,
+            &#39;/vendor/foo.bar.baz.dib.zim.gir/src&#39;
+        );
+    }
+
+    public function testExistingFile()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\ClassName&#39;);
+        $expect = &#39;/vendor/foo.bar/src/ClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\ClassNameTest&#39;);
+        $expect = &#39;/vendor/foo.bar/tests/ClassNameTest.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+    }
+
+    public function testMissingFile()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;No_Vendor\No_Package\NoClass&#39;);
+        $this-&amp;gt;assertFalse($actual);
+    }
+
+    public function testDeepFile()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\Baz\Dib\Zim\Gir\ClassName&#39;);
+        $expect = &#39;/vendor/foo.bar.baz.dib.zim.gir/src/ClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+    }
+
+    public function testConfusion()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\DoomClassName&#39;);
+        $expect = &#39;/vendor/foo.bar/src/DoomClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\BarDoom\ClassName&#39;);
+        $expect = &#39;/vendor/foo.bardoom/src/ClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+    }
+}
+</code></pre><p>&nbsp;</p>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/13/psr4-e8-87-aa-e5-8a-a8-e5-8a-a0-e8-bd-bdautoload-e5-a2-9e-e5-bc-ba-e7-89-88/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/13/psr3-e6-97-a5-e5-bf-97-e6-8e-a5-e5-8f-a3/"> 
+                    PSR3 日志接口 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-13   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>这一规范主要是实现日志接口的一个规范，因为暂时没用到，所以先不介绍，以后补上。</p>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/13/psr3-e6-97-a5-e5-bf-97-e6-8e-a5-e5-8f-a3/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/13/psr2/"> 
+                    PSR2 代码风格指导 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-13   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>PSR2 编码风格向导。</p>
+<p>PSR2是用来约束<strong>代码风格</strong>的。可是说是所有里面最关键最重要的，也是需要好好规范和共同遵守的。</p>
+<p>还是按照惯例一句句的翻译。</p>
+<blockquote>
+<p>1、Code MUST follow a “coding style guide” PSR [<a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md" target="_blank" rel="noopener">PSR-1</a>].</p>
+<p>代码必须遵循psr1规范。</p>
+<p>2、Code MUST use 4 spaces for indenting, not tabs.</p>
+<p>代码必须使用4个空格来缩进，而不是tab键<br>这一点感触较深，因为用sublime或者phpstrom的时候，默认tab是4个空格，可是到了win下面的notepad++，就变成2个空格了，瞬间代码就变得不堪入目。。<br>3、There MUST NOT be a hard limit on line length; the soft limit MUST be 120 characters; lines SHOULD be 80 characters or less.</p>
+<p>代码行的长度不应该硬性规定，一个行长度要求必须小于<strong>120</strong>个字符，应该小于<strong>80</strong>字符或更少。</p>
+<p>4、There MUST be one blank line after the <code>namespace</code> declaration, and there MUST be one blank line after the block of <code>use</code> declarations.</p>
+<p>在namespace的声明下面必须要有一<strong>空行</strong>，在声明use下面也必须有一<strong>空行。</strong></p>
+</blockquote>
+<pre><code>&amp;lt;?php
+namespace \Project\First\Learn;
+
+use \Project\First\Learn\AClass;
+
+class MyClass ( )
+{
+}`&lt;/pre&gt;
+&gt; 5、Opening braces for classes MUST go on the next line, and closing braces MUST go on the next line after the body.
+</code></pre><blockquote>
+<pre><code>6、Opening braces for methods MUST go on the next line, and closing braces MUST go on the next line after the body.
+
+
+_**类和方法**_开始的大括号必须另起一行，结束的大括号也必须在最后另起一行。
+
+
+7、Visibility MUST be declared on all properties and methods; `abstract` and `final` MUST be declared before the visibility; `static` MUST be declared after the visibility.
+
+
+所有**属性和方法**前面必须声明其**可见性，**abstract 和final必须修饰在可见性之前，static必须声明在可见性之后。
+什么是visibility可见性呢，其实就是三个访问控制符public、protected、private.这里要注意不能省略不写，也不可以用var来定义php的变量（var是php4里面使用，php5里面var等同于public）
+</code></pre><p>8、Control structure keywords MUST have one space after them; method and function calls MUST NOT.</p>
+<pre><code>控制结构的关键词的后面必须要一个空格，方法和函数调用则不能够有空格。
+
+
+9、Opening braces for control structures MUST go on the same line, and closing braces MUST go on the next line after the body.
+
+
+控制结构的开始大括号必须不换行，结束大括号必须换行。
+
+
+10、Opening parentheses for control structures MUST NOT have a space after them, and closing parentheses for control structures MUST NOT have a space before.
+
+
+控制结构的开始圆括号之后不能有空格，结束圆括号之前也不能够出现空格。
+上面的8－10点我最后会贴出一个例子来说明。
+</code></pre></blockquote>
+<pre><code>下面补充几点。
+&gt; 1、源文件
+</code></pre><blockquote>
+<pre><code>All PHP files MUST use the Unix LF (linefeed) line ending.
+
+
+All PHP files MUST end with a single blank line.
+
+
+The closing `?&amp;gt;` tag MUST be omitted from files containing only PHP.
+
+
+所有的php源文件必须是用LF做换行符，结尾必须要留一空行且不能够有?&amp;gt;
+不能够以?&amp;gt;结尾是因为防止在结尾之后出现空行或者其它误输入导致脚本不正常输出。
+</code></pre><p>2、行</p>
+<pre><code>Blank lines MAY be added to improve readability and to indicate related blocks of code.
+
+
+There MUST NOT be more than one statement per line.
+
+
+可以加入适当的空行来增强代码的可阅读性和指出相关的代码块。
+
+
+每行必须只有一句php代码。
+
+
+3、关键字和Ture、False、Null
+
+
+PHP [keywords](http://php.net/manual/en/reserved.keywords.php) MUST be in lower case.
+
+
+The PHP constants `true`, `false`, and `null` MUST be in lower case.
+
+
+php的关键字和true、false、null必须小写
+
+
+4、继承与实现
+
+
+The `extends` and `implements` keywords MUST be declared on the same line as the class name.
+
+
+继承和实现这两个关键字必须与类名在同一行声明。
+
+
+Lists of `implements` MAY be split across multiple lines, where each subsequent line is indented once. When doing so, the first item in the list MUST be on the next line, and there MUST be only one interface per line.
+um，好长，，直接举例子。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`class ClassName extends ParentClass implements
+    \ArrayAccess,
+    \Countable,
+    \Serializable
+{
+    // constants, properties, methods
+}`&lt;/pre&gt;
+最后给一个官方的完全遵循了psr2的代码。要注意if的空格，他和foreach、switch case、for、while、do while、try catch的空格要求是一样的：
+</code></pre></blockquote>
+<pre><code>1、关键词后面要空，if ()
+
+2、第一个参数和最后一个参数贴紧圆括号.参数后逗号然后空格之后才是下一个参数。
+
+if ($a, $b, $c)
+
+3、开始花括号不能换行，结束大括号必须换行。
+
+if ($a, $b, $c) {
+
+}
+
+4.switch的break;要换行写。
+
+switch ($str) {
+
+case 0: echo &#39;0&#39;;
+
+break;
+
+}
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+namespace Vendor\Package;
+
+use FooInterface;
+use BarClass as Bar;
+use OtherVendor\OtherPackage\BazClass;
+
+class Foo extends Bar implements FooInterface
+{
+    public function sampleFunction($a, $b = null)
+    {
+        if ($a === $b) {
+            bar();
+        } elseif ($a &amp;gt; $b) {
+            $foo-&amp;gt;bar($arg1);
+        } else {
+            BazClass::bar($arg2, $arg3);
+        }
+    }
+
+    final public static function bar()
+    {
+        // method body
+    }
+}
+</code></pre><p>&nbsp;</p>
+<p>&nbsp;</p>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/13/psr2/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/12/psr1/"> 
+                    PSR1 基本代码规范 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-12   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>psr1讲的是基本代码规范。下面我们来看一下。</p>
+<blockquote>
+<p>1、Files MUST use only <code>&amp;lt;?php</code> and <code>&amp;lt;?=</code> tags.</p>
+<p>php文件必须只能使用&lt;?php和&lt;?=标签<br>嗯。好。第二条<br>2、Files MUST use only UTF-8 without BOM for PHP code.</p>
+<p>php文件必须使用没有bom头的utf－8编码。<br>这个很重要，很多人发现自己的php会发生一些莫名其妙的错误，很多时候就是编码的问题。可以利用notepad++来改变编码。<br>3、Files SHOULD <em>either</em> declare symbols (classes, functions, constants, etc.) _or _cause side-effects (e.g. generate output, change .ini settings, etc.) but SHOULD NOT do both.</p>
+<p>php文件应该（建议）用来声明类，方法，常量等等。或者用来做一些会造成附加影响的操作。例如输出，更改配置等等。但是它们不应该（建议）同时存在同一个文件当中<br>这里的意思就是在一文件里面不要同时出现(function,class,const)和(echo,ini_set)。<br>4、Namespaces and classes MUST follow an “autoloading” PSR: [<a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md" target="_blank" rel="noopener">PSR-0</a>, <a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md" target="_blank" rel="noopener">PSR-4</a>].</p>
+<p>命名规则必须遵循自动载入psr0或psr4.<br>继续。。<br>5、Class names MUST be declared in <code>StudlyCaps</code>.</p>
+<p>类名必须用大驼峰声明<br>class MyClass{}<br>6、Class constants MUST be declared in all upper case with underscore separators.</p>
+<p>类常量声明必须用大写和下划线隔开<br>const MY_VALUE;<br>7、Method names MUST be declared in <code>camelCase</code>.</p>
+<p>方法名必须以小驼峰命名。<br>public function getName(){}</p>
+</blockquote>
+<p>完。</p>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/12/psr1/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/12/psr0/"> 
+                    PSR0 自动加载标准（Autoloading Standard） 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-12   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>由于psr4的出现，psr0是官方不推荐使用的，可是学多了总没坏，接下来让我们了解一下这套标准。</p>
+<p>他主要有6点。</p>
+<blockquote>
+<p>1、命名空间一定要与绝对路径一致。\Vendor\namespace\<br>例如你有一个文件是 Path/Doctrine/Common/IsolatedClassLoader.php</p>
+</blockquote>
+<pre><code>namespace \Doctrine\Common\ 
+$IsolatedClassLoader = new \Doctrine\Common\IsolatedClassLoader;
+</code></pre><p>上面的例子很明显，当new一个 \Doctrine\Common\IsolatedClassLoader的时候，系统按照这个顺序去查找Vendor -&gt; Doctrine -&gt; Common -&gt; IsolatedClassLoader.php</p>
+<blockquote>
+<p>2、当从文件系统中载入时，合格的namespace和class一定是以 .php 结尾的<br>这个。。嗯嗯，相信没人会用php1、php2这样的后缀吧。。<br>3、当从文件系统中加载时，每个namespace的分隔符(/)要转换成 <code>DIRECTORY_SEPARATOR</code>(操作系统路径分隔符)</p>
+</blockquote>
+<ul>
+<li><p><code>\Zend\Mail\Message</code> =&gt; <code>/path/to/project/lib/vendor/Zend/Mail/Message.php</code></p>
+<blockquote>
+<p><del></del>4、在类名中，每个下划线(_)符号要转换成<code>DIRECTORY_SEPARATOR</code>(操作系统路径分隔符)。在namespace中，下划线(_)符号是没有（特殊）意义的。</p>
+</blockquote>
+</li>
+<li><p><code>\namespace\package_name\Class_Name</code> =&gt;<code>/path/to/project/lib/vendor/namespace/package_name/Class/Name.php</code><br>注意看package_name和Class_Name转化为路径的区别。</p>
+<blockquote>
+<p>5、verdor name,namespaces,class名可以由大小写字母组合而成（大小写敏感的）<br>这个大小写问题要重视，因为在liunx下面目录和文件都是区分大小写的。<br>6、只能有一个入口文件，其它的每一个php文件都必须只有一个类。</p>
+</blockquote>
+</li>
+</ul>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/12/psr0/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/12/psr-e7-b3-bb-e5-88-97/"> 
+                    PSR系列 Proposing a Standards Recommendation（提出标准建议） 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-12   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>在说啥是PSR-[0-7]规范的之前，我觉得我们有必要说下它的发明者和规范者：PHP-FIG，它的网站是：<a href="http://www.php-fig.org/" target="_blank" rel="noopener">www.php-fig.org</a>。就是这个联盟组织发明和创造了PSR-[0-7]规范，膜拜吧，屌丝们！</p>
+<p>FIG 是 Framework Interoperability Group（框架可互用性小组）的缩写，由几位开源框架的开发者成立于 2009 年，从那开始也选取了很多其他成员进来，虽然不是 “官方” 组织，但也代表了社区中不小的一块。组织的目的在于：以最低程度的限制，来统一各个项目的编码规范，避免各家自行发展的风格阻碍了程序设计师开发的困扰，于是大伙发明和总结了PSR，PSR是Proposing a Standards Recommendation（提出标准建议）的缩写，截止到目前为止，总共有7套PSR规范，分别是：</p>
+<blockquote>
+<p>PSR-0 (Autoloading Standard) 自动加载标准</p>
+<p>PSR-1 (Basic Coding Standard) 基础编码标准</p>
+<p>PSR-2 (Coding Style Guide) 编码风格向导</p>
+<p>PSR-3 (Logger Interface) 日志接口</p>
+<p>PSR-4 (Improved Autoloading) 自动加载的增强版，可以替换掉PSR-0了。</p>
+<p>PSR-6(Caching Interface)缓存接口</p>
+<p>PSR-7(HTTP Message Interface)http消息接口</p>
+</blockquote>
+<p>接下来的篇目，我们会针对这7套，深入了解下。仔细学习下受万千PHPer热捧的这7套规范到底有啥出众之处。</p>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/12/psr-e7-b3-bb-e5-88-97/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/07/e6-8f-90-e9-ab-98php-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-ba-8c-e3-80-81memcached-ef-bc-89/"> 
+                    提高php性能的N种方法（二、Memcached） 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-07   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>惯例摘录百度百科对Memcached的描述。</p>
+<blockquote>
+<p>Memcached 是一个高性能的分布式内存对象缓存系统，用于动态Web应用以减轻数据库负载。它通过在内存中缓存数据和对象来减少读取数据库的次数，从而提高动态、数据库驱动网站的速度。Memcached基于一个存储键/值对的<a href="http://baike.baidu.com/view/1487140.htm" target="_blank" rel="noopener">hashmap</a>。其<a href="http://baike.baidu.com/view/53123.htm" target="_blank" rel="noopener">守护进程</a>（daemon ）是用<a href="http://baike.baidu.com/subview/10075/6770152.htm" target="_blank" rel="noopener">C</a>写的，但是客户端可以用任何语言来编写，并通过memcached协议与守护进程通信。<br>Memcached是基于键值对的hashmap，贮存于内存，只支持储存字符串类型，垃圾回收采用LRU（最近未使用算法），对小型静态数据进行缓存处理，尤其是html代码段，在处理元数据时所消耗的内存资源相对Redis（另外一个负盛名的键值数据存储方案。下次会讲到）更少。</p>
+</blockquote>
+<p>介绍完之后，说说他的安装和配置。</p>
+<p>分客户端和服务器端</p>
+<p>1、客户端（开启Memcached的php扩展）</p>
+<p>1）如果你的php包是使用yum（<strong>Redhat/Fedora/Centos</strong>）一键安装的。可以采用</p>
+<blockquote>
+<p>yum install php-pecl-memcache<br>进行安装（不建议）。</p>
+</blockquote>
+<p>2）pecl安装。这是第二简洁的方案。只要你熟悉使用pecl安装php的扩展的话。</p>
+<blockquote>
+<div>pecl install memcache</div>
+
+<div>yum install zlib-devel</div>
+
+<div>echo ‘extension=memcache.so’ &gt;&gt; /etc/php.ini</div><br><div>    3）从官网下载编译安装。以上两种方法均失败的话。就只能使用这个方法了，如下：</div><br><div><br><br><div>wget <a href="http://pecl.[php.net/get/memcache-2.2.7.tgz](http://php.net/get/memcache-2.2.7.tgz" target="_blank" rel="noopener">http://pecl.[php.net/get/memcache-2.2.7.tgz](http://php.net/get/memcache-2.2.7.tgz</a>)</div>
+
+<div>tar -zxvf memcache-2.2.7.tgzc</div>
+
+<p>cd memcache-2.2.7</p>
+<p>/usr/local/php/bin/phpize</p>
+<p>./configure –with-php-config=/usr/local/php/bin/php-config</p>
+<div>make &amp;&amp; make install</div>
+
+<div><br><br><br><strong>注意：</strong>/usr/local/php/ 为php的安装路径，需要根据你安装的实际目录调整。<br><br><br></div>
+
+<p></p></div><p></p>
+<p><div></div></p>
+<div>
+
+</div></blockquote>
+<p>安装成功后会显示你的memcache.so扩展的位置，比如我的：</p>
+<p><br></p>
+<div><br><div><br><pre>Installing shared extensions:/usr/local/php/lib/php/extensions/no-debug-non-zts-20090626/<br><br></pre><br></div><br></div><br><div><br><div><br><br>最后我们需要把这个扩展添加到php中，打开你的php.ini文件在最后添加以下内容：<br><br></div><br></div><br>&gt; <div><br>&gt;<br>&gt; <div><br>&gt;<br>&gt; <div>[Memcache]<br>&gt;<br>&gt; extension_dir = “/usr/local/php/lib/php/extensions/no-debug-non-zts-20090626/“<br>&gt;<br>&gt; <div>extension = memcache.so</div><br>&gt;<br>&gt; </div><br>&gt;<br>&gt; </div><br>&gt;<br>&gt; </div><br><div><br><div><br><div><br><div>最后重启服务器（Apache）</div><br>&gt; <div>/usr/local/apache2/bin/httpd －k restart</div><br></div><br></div><br></div><br>检查安装结果<br><pre>/usr/local/php/bin/php -m | grep memcache<br><br></pre><br><div><br><div>安装成功会输出：memcache。</div><br><div></div><br><div>2、安装服务器端</div><br></div><br><div><br><div>    1）Linux系统安装memcached，首先要先安装lib event库。</div><br><div><br>&gt; <div><br>&gt;<br>&gt;<br>&gt; sudo apt-get install libevent libevent-devel          自动下载安装（Ubuntu/Debian）<br>&gt;<br>&gt; <div>yum install libevent libevent-devel                      自动下载安装（Redhat/Fedora/Centos）</div><br>&gt;<br>&gt; </div><br><div><br><br>    2）安装Memcached<strong>Ubuntu/Debian</strong><br><pre>sudo apt-get install memcached<br></pre><br><strong>Redhat/Fedora/Centos</strong><br><pre>yum install memcached</pre><br></div><br><div><br><br><strong>3）启动选项：</strong><br><br><em>   -d是启动一个守护进程；
+</em>   -m是分配给Memcache使用的内存数量，单位是MB；<br><em>   -u是运行Memcache的用户；
+</em>   -l是监听的服务器IP地址，可以有多个地址；<br><em>   -p是设置Memcache监听的端口，，最好是1024以上的端口；
+</em>   -c是最大运行的并发连接数，默认是1024；<br>*   -P是设置保存Memcache的pid文件。<br></div><br><div><br><div></div><br>&gt; <div>/usr/local/memcached/bin/memcached -p 11211 -m 64m -d -u root</div><br></div><br></div><br></div>
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/07/e6-8f-90-e9-ab-98php-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-ba-8c-e3-80-81memcached-ef-bc-89/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/"> 
+                    提高php性能的N种方法（一、Xcache） 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-07   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>首先摘录一段在百度百科对Xcache的介绍：</p>
+<blockquote>
+<p>XCache 是一个开源的 opcode 缓存器/优化器, 这意味着他能够提高您服务器上的 PHP 性能. 他通过把编译 PHP 后的数据缓冲到<a href="http://baike.baidu.com/subview/120892/120892.htm" target="_blank" rel="noopener">共享内存</a>从而避免重复的编译过程, 能够直接使用缓冲区已编译的代码从而提高速度. 通常能够提高您的页面生成速率 2 到5 倍, 降低服务器负载.<br>没错。配置Xcache会把你的php编译后的opcode做缓存。他还提供了变量缓存功能（存放在内存），下面会介绍Xcache的安装和配置。</p>
+<div>
+
+</div></blockquote>
+<h1 id="wget-c-http-xcache-lighttpd-net-pub-Releases-3-2-0-xcache-3-2-0-tar-gz"><a href="#wget-c-http-xcache-lighttpd-net-pub-Releases-3-2-0-xcache-3-2-0-tar-gz" class="headerlink" title="wget -c http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz"></a>wget -c <a href="http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz" target="_blank" rel="noopener">http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz</a></h1><h1 id="tar-zxvf-xcache-3-2-0-tar-gz"><a href="#tar-zxvf-xcache-3-2-0-tar-gz" class="headerlink" title="tar zxvf xcache-3.2.0.tar.gz"></a>tar zxvf xcache-3.2.0.tar.gz</h1><h1 id="cd-xcache-3-2-0"><a href="#cd-xcache-3-2-0" class="headerlink" title="cd xcache-3.2.0"></a>cd xcache-3.2.0</h1><h1 id="usr-local-php-bin-phpize"><a href="#usr-local-php-bin-phpize" class="headerlink" title="/usr/local/php/bin/phpize"></a>/usr/local/php/bin/phpize</h1><p></p>
+<div></div><br><div><br><div><br><div># ./configure –enable-xcache –enable-xcache-coverager –enable-xcache-optimizer –with-php-config=/usr/bin/php-config</div><br></div><br># make &amp;&amp; make install<br><br>以上为安装过程，注：<br>–enable-xcache 表示启用Xcache支持；<br>–enable-xcache-coverager 表示包含用于测量加速器功效的附加特性；<br>–enable-xcache-optimizer表示启用操作码优化<br><div>echo “extension=xxxx” &gt;&gt; /etc/php.ini    (在php.ini里面开启Xcache扩展)</div><br><div>cat cache.ini &gt;&gt; php.ini  (复制Xcache自带的默认配置copy一份到php.ini)</div><br><div>cp -r /htdocs /var/www/html/(把Xcache的管理页面移动你的web目录)</div><br></div><br><div></div><br><div>检验Xcache是否安装成功 php -v 。</div><br><div></div><br><div>下面这段配置开启Xcache管理页面的http认证（一般建议开启）</div><br><div><br><pre>[xcache.admin]<br> xcache.admin.enable_auth = On    //开启后就能使用Xcache的admin页面了<br> xcache.admin.user = “admin”;<br>/<em>run: echo -n “yourpassword” |md5sum |awk ‘{print }’ to get md5 password</em>/<br> xcache.admin.pass = “安装时候输入的密码（MD5密文）”<br><br></pre><br><div>下面这段是Xcache的常规配置</div><br><div>[xcache]</div><br><div>xcache.cacher = On  // 使用/不使用 opcode 缓存器. xcache.size = 0 时无效.<br>xcache.shm_scheme = “mmap”<br>xcache.size = 20M   //0 禁止, 非 0 则启用缓存器. 请注意您系统所允许的 mmap 最大值.<br>; set to cpu count (cat /proc/cpuinfo |grep -c processor)<br>xcache.count = 4   //建议和cpu核数一样<br>xcache.slots = 8K   //只是作为 hash 槽个数的参考值, 您可以放心地缓冲超过这个个数的项目.<br>xcache.ttl = 0   //设置缓冲项目的 Ttl (Time To Live) 值, 0=永不过期.<br>xcache.gc_interval = 0   //检查过期项目, 回收内存空间的间隔.<br>xcache.var_size = 4M<br>xcache.var_count = 1<br>xcache.var_slots = 8K<br>xcache.var_ttl = 0<br>xcache.var_maxttl = 0<br>xcache.var_gc_interval = 300<br>xcache.readonly_protection = Off<br>; for <em>nix, xcache.mmap_path is a file path, not directory. (auto create/overwrite)<br>; Use something like “/tmp/xcache” instead of “/dev/</em>“ if you want to turn on ReadonlyProtection<br><div> ; different process group of php won’t share the same /tmp/xcache</div><br><div><br><div>xcache.mmap_path = “/dev/zero”<br>xcache.coredump_directory = “”<br>xcache.experimental = Off<br>xcache.stat = On<br>xcache.optimizer = Off</div><br></div><br><div></div><br><div>最重要的参数是xcache.var_size和xcache.size，可以根据内存设置，但是在top中，内存占用直接多出来很多，比如都设置了为256M，则php-cgi的占用就在530M左右，基本的php大约10-15M，加上512M，就快到530了。</div><br></div><br></div><br><div></div>
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/"> 
+                    http状态码（常用） 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-06   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/杂记/">杂记</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <div>1XX 消息类型</div><br><div>101     Switching Protocols     在websocket通信用到</div><br><div></div><br><div>2XX成功</div><br><div>200     ok     表示成功，请求所希望的响应头或数据体将随此响应返回。</div><br><div>206     Partial Content      部分内容，只能用get，迅雷等下载工具断点续传。或者在线视频</div><br><div></div><br><div>3XX重定向</div><br><div>301     Moved Permanently     资源永久转移，新的location会被缓存</div><br><div>302     Found     资源临时转移，除非有制定缓存头，否则下次会继续向原有地址发送。</div><br><div><br><div>如果这不是一个GET或者HEAD请求，因此浏览器禁止自动进行重定向，除非得到用户的确认，因为请求的条件可能因此发生变化。</div><br><div><br><div>注意：对于某些使用HTTP/1.0协议的浏览器，当它们发送的POST请求得到了一个301响应的话，接下来的重定向请求将会变成GET方式</div><br></div><br></div><br><div>304     Not Modify     客户端的缓存资源是最新的。（要用户使用缓存）</div><br><div></div><br><div>4XX 客户端错误</div><br><div>400      Bad Request      由于包含<a href="https://zh.wikipedia.org/wiki/%E8%AF%AD%E6%B3%95" title="语法" target="_blank" rel="noopener">语法</a>错误，当前请求无法被服务器理解。</div><br><div>401     UnAuthorized     要求用户验证。该响应必须包含一个适用于被请求资源的WWW-Authenticate信息头用以询问用户信息。</div><br><div>403      Forbidden     禁止访问</div><br><div>404      Not Found     请求失败，请求所希望得到的资源未被在服务器上发现。</div><br><div>405     Method Not Allowed     服务器不支持使用的方法</div><br><div></div><br><div>5XX服务器错误</div><br><div>500      internal Server Error     服务器内部错误（程序语法错误）</div><br><div>501     Not Implemented     未实现的方法</div><br><div>502      Bad Gateway     无效的网关或代理</div><br><div>503     Services <span style="color: #252525; font-family: sans-serif;">Unavailable     服务器过载</span></div><br><div>504     Gateway Timeout     网关超时</div><br><div></div>
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/03/wp-syntax-e4-bb-a3-e7-a0-81-e9-ab-98-e4-ba-ae-e6-8f-92-e4-bb-b6-e6-b5-8b-e8-af-95/"> 
+                    （转）PHP新的垃圾回收机制:Zend GC详解 
+                </a>
+            </h1>
+                        <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-03   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+            <div class="content">
+                
+                <p>先介绍php的变量机制。</p>
+<p>在引擎内部，变量都是用一个结构体来表示，这个结构体可以在{PHPSRC}/Zend/zend.h中找到：</p>
+<pre><code>struct _zval_struct {  
+    /* Variable information */  
+    zvalue_value value;     /* value */  
+    zend_uint refcount__gc;  
+    zend_uchar type;    /* active type */  
+    zend_uchar is_ref__gc;  
+}; 
+`&lt;/pre&gt;
+value是变量具体的值。type是变量在运行时的类型（动态的）。
+
+value的类型zvalue_value同样定义在此文件中：
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`typedef union _zvalue_value {  
+    long lval;                  /* long value */  
+    double dval;                /* double value */  
+    struct {  
+        char *val;  
+        int len;  
+    } str;  
+    HashTable *ht;              /* hash table value */  
+    zend_object_value obj;  
+} zvalue_value;`&lt;/pre&gt;
+&amp;nbsp;
+
+根据要转化的类型。在{PHPSRC}/Zend/zend_operators.c中定义了各种类型转换的宏，比如转换成布尔类型的宏zendi_convert_to_boolean，主要的思路就是先把type变成IS_BOOL,然后根据原变量的不同类型的值按照一定规则转换成lval的0或则1。
+
+refcount引用计数，is_ref是否引用变量
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php    //值引用
+$strA = &#39;a string&#39;;    /*$strA {refcount=1,is_ref=0}*/
+$strB = $strA;    /*$strA 、$strB{refcount=2,is_ref=0}*/
+$strB = &#39;also a string&#39;;    /*$strA{refcount=1,is_ref=0}      
+                             $strB{refcount=1,is_ref=0}*/
+?&amp;gt;`&lt;/pre&gt;
+值引用的两个变量都是指向同一个zval。当$strB被赋值时，会发生变量复制（copy on write）
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php    //指针引用
+$strA = &#39;a string&#39;;    /*$strA {refcount=1,is_ref=0}*/
+$strB = &amp;amp;$strA;    /*$strA 、$strB{refcount=2,is_ref=1}*/
+$strB = &#39;also a string&#39;;   /*$strA 、$strB{refcount=2,is_ref=1}*/
+?&amp;gt;`&lt;/pre&gt;
+上面的例子，指针引用的时候不会发生变量分离，两个变量还是指向同一个zval，echo $strA为新修改的值。
+
+unset
+
+unset不是一个函数，而是一个语言结构，主要是从当前符号表中删除参数中的符号，先执行析构函数把这个变量指向的zval.refcount--，当refcount==0时，这个zval才会被释放。
+
+php5.3新增了gc机制。看了原博客的对源码的分析，感觉不太理解。所以直接贴出我对它过程的一个理解。
+
+1、首先垃圾的判断：refcount被减少后，仍不等于0，此时zval有可能是垃圾。
+
+2、举一个会产生垃圾的例子
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+$a = array(&quot;one&quot;);
+$a[] =  &amp;amp;$a;
+unset($a);
+?&amp;gt;
+</code></pre><p>因为在php里面数组都是hash表。引用一张图片</p>
+<p><img src="http://hi.csdn.net/attachment/201007/14/0_1279125118KaUD.gif" alt=""></p>
+<p>unset($a)后。<br><img src="http://hi.csdn.net/attachment/201007/14/0_1279125451Z3FK.gif" alt=""></p>
+<p>此时符号表中已经不存在$a这个符号了。可是数组已经不能引用了。此时这个array便是垃圾。</p>
+<p>3、gc过程</p>
+<p>gc_mark_roots()</p>
+<p>这个函数对节点信息的链表进行一次深度优先遍历，将其中的zval的refcount减1，为了避免对同一个zval重复减操作，在操作之后将zval标记成灰色。（对节点自身的zval可以重复减操作，这个是此算法的基础）</p>
+<p>gc_scan_roots()</p>
+<p>这个函数对节点信息的链表再次进行深度优先遍历，如果发现zval的refcount大于等于1，则对该zval和其包含的zval的refcount加1操作，这个是对非垃圾的一个信息还原，然后将这些zval颜色属性去掉(设置成black)。如果发现zval的refcount等于0，则就标记成白色，这些是后面将要清理掉的垃圾。</p>
+<p>gc_collect_roots()</p>
+<p>遍历节点信息链表,将前面一个步骤中标记为白色的节点信息放到GC_G(zval_to_free)为入口的链表中，这个链表用来存放将要释放的垃圾。 然后释放掉全部的节点信息，缓冲区被清空。分析结束后将重新收集节点信息。</p>
+<p>最后释放链表存在的垃圾</p>
+<p>看到最后，大家可以根据这个算法去分析一下上面的两种情况，gc是否会工作，怎么工作的。</p>
+<p>原文系列链接：<a href="http://blog.csdn.net/phpkernel/article/details/5734743" target="_blank" rel="noopener">PHP kernel - Inside PHP PHP的奥秘</a></p>
+
+                
+            </div>
+            <div class="continue">
+            <a href="/2016/03/03/wp-syntax-e4-bb-a3-e7-a0-81-e9-ab-98-e4-ba-ae-e6-8f-92-e4-bb-b6-e6-b5-8b-e8-af-95/">
+            继续阅读            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+            </div>
+        </article>
+        
+</section>
+
+  <nav class="page-nav">
+    <a class="extend prev" rel="prev" href="/page/3/">&laquo; 上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/">下一页 &raquo;</a>
+  </nav>
+
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

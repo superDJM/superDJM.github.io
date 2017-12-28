@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            Mongoose在创建Model时对Collection的命名策略
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/07/25/mongoose-e5-9c-a8-e5-88-9b-e5-bb-bamodel-e6-97-b6-e5-af-b9collection-e7-9a-84-e5-91-bd-e5-90-8d-e7-ad-96-e7-95-a5/"> 
+                    Mongoose在创建Model时对Collection的命名策略 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-07-25   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/node-js/">node.js</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>最近在使用express+mongoose+jade搭建一个小小的node.js应用。</p>
+<p>mongoose是node里面作为mongodb的orm的api层。使用mongoose的schema、model，可以很方便的以面向对象的方式对mongodb进行curd操作。</p>
+<p>首先创建一个schema，定义你的collection。我创建的是一个follow表，里面存放着微信粉丝的一些信息。</p>
+<p>/schema/follow.js</p>
+<pre><code>var mongoose = require(&#39;mongoose&#39;);
+var Schema = mongoose.Schema;
+
+//在这定义followschema的结构
+var FollowSchema = new Schema({
+    subscribe    : { type : Number, default : 0},
+    nickname     : String,
+    openid       : String,
+    sex          : Number,
+    headimgurl   : String,
+    country         : String,
+    province     : String,
+    city         : String,
+});
+//在这里定义schema的静态方法
+FollowSchema.statics = {
+    findByOpenid : function (openid, cb) {
+        return this.
+            findOne({openid : openid})
+            .exec(cb);
+    }
+}
+
+module.exports = FollowSchema;`&lt;/pre&gt;
+/model/follow.js
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`var mongoose = require(&#39;mongoose&#39;);
+var FollowSchema = require(&#39;../schema/follow&#39;);
+//进行model的编译
+var Follow = mongoose.model(
+    &#39;Follow&#39;,
+    FollowSchema
+    );
+
+module.exports = Follow;`&lt;/pre&gt;
+app.js
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`var mongoose = require(&#39;mongoose&#39;);
+function connectDb() {    
+    mongoose.connect(&#39;mongodb://localhost/test&#39;);
+    var db = mongoose.connection;
+    db.on(&#39;error&#39;, console.error.bind(console, &#39;... connection error ...&#39;));
+    db.once(&#39;open&#39;, function callback() {
+      console.info(&quot;... db open ...&quot;);
+    });
+}
+
+var _follow = new Follow({
+            subscribe    : data.subscribe,
+            nickname     : data.nickname,
+            openid       : data.openid,
+            sex          : data.sex,
+            headimgurl   : data.headimgurl,
+            country      : data.country,
+            province     : data.province,
+            city     : data.city,
+            });
+_follow.save(function(err, _follow) {
+    if (err) {
+        throw err;
+        }
+        console.log(_follow);
+    })
+</code></pre><p>通过model的save方法就完成了数据的插入。</p>
+<p>当我用命令行连上mongo的时候，用db.follow.find()并没有找到任何项，那就奇怪了。命名起的是这个名字，怎么就找不到了。当我输入show collections的时候，出现了一个名叫follows的colloection，竟然被强制加上复数形式。。</p>
+<p>然后我就发现了一篇很好的文章，从源码的角度对这个问题进行了解释，附上<a href="http://aiilive.blog.51cto.com/1925756/1405203" target="_blank" rel="noopener">链接</a>。</p>
+<p>我在下面简单的概括一下，就是mongoose的作者在创建colloection的时候，会根据你定义的单词进行正则匹配，判断是可数名词还是不可数，如果是可数名词的话，再判断它的复数形式，然后替换成她们的复数形式。源码在mongoose/lib/util.js。</p>
+<p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/07/25/mongoose-e5-9c-a8-e5-88-9b-e5-bb-bamodel-e6-97-b6-e5-af-b9collection-e7-9a-84-e5-91-bd-e5-90-8d-e7-ad-96-e7-95-a5/">http://superdjm.github.io/2016/07/25/mongoose-e5-9c-a8-e5-88-9b-e5-bb-bamodel-e6-97-b6-e5-af-b9collection-e7-9a-84-e5-91-bd-e5-90-8d-e7-ad-96-e7-95-a5/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/07/27/keepalive-ef-bc-88-e5-89-8d-e7-ab-af-e9-ab-98-e5-8f-af-e7-94-a8-ef-bc-89-e5-88-9d-e6-8e-a2/">  keepalive（前端高可用）初探</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/07/25/node-js-e7-83-ad-e9-83-a8-e7-bd-b2-ef-bc-88-e7-9b-91-e5-90-ac-e6-96-87-e4-bb-b6-e4-bf-ae-e6-94-b9-e8-87-aa-e5-8a-a8-e9-87-8d-e5-90-afnode-e6-9c-8d-e5-8a-a1-ef-bc-89/"> node.js 热部署（监听文件修改自动重启node服务） </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Mon Jul 25 2016 19:56:03 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

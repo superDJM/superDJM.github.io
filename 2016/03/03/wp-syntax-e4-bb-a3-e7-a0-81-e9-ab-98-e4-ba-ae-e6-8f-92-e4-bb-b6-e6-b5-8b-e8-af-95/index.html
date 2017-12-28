@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            （转）PHP新的垃圾回收机制:Zend GC详解
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/03/wp-syntax-e4-bb-a3-e7-a0-81-e9-ab-98-e4-ba-ae-e6-8f-92-e4-bb-b6-e6-b5-8b-e8-af-95/"> 
+                    （转）PHP新的垃圾回收机制:Zend GC详解 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-03   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>先介绍php的变量机制。</p>
+<p>在引擎内部，变量都是用一个结构体来表示，这个结构体可以在{PHPSRC}/Zend/zend.h中找到：</p>
+<pre><code>struct _zval_struct {  
+    /* Variable information */  
+    zvalue_value value;     /* value */  
+    zend_uint refcount__gc;  
+    zend_uchar type;    /* active type */  
+    zend_uchar is_ref__gc;  
+}; 
+`&lt;/pre&gt;
+value是变量具体的值。type是变量在运行时的类型（动态的）。
+
+value的类型zvalue_value同样定义在此文件中：
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`typedef union _zvalue_value {  
+    long lval;                  /* long value */  
+    double dval;                /* double value */  
+    struct {  
+        char *val;  
+        int len;  
+    } str;  
+    HashTable *ht;              /* hash table value */  
+    zend_object_value obj;  
+} zvalue_value;`&lt;/pre&gt;
+&amp;nbsp;
+
+根据要转化的类型。在{PHPSRC}/Zend/zend_operators.c中定义了各种类型转换的宏，比如转换成布尔类型的宏zendi_convert_to_boolean，主要的思路就是先把type变成IS_BOOL,然后根据原变量的不同类型的值按照一定规则转换成lval的0或则1。
+
+refcount引用计数，is_ref是否引用变量
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php    //值引用
+$strA = &#39;a string&#39;;    /*$strA {refcount=1,is_ref=0}*/
+$strB = $strA;    /*$strA 、$strB{refcount=2,is_ref=0}*/
+$strB = &#39;also a string&#39;;    /*$strA{refcount=1,is_ref=0}      
+                             $strB{refcount=1,is_ref=0}*/
+?&amp;gt;`&lt;/pre&gt;
+值引用的两个变量都是指向同一个zval。当$strB被赋值时，会发生变量复制（copy on write）
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php    //指针引用
+$strA = &#39;a string&#39;;    /*$strA {refcount=1,is_ref=0}*/
+$strB = &amp;amp;$strA;    /*$strA 、$strB{refcount=2,is_ref=1}*/
+$strB = &#39;also a string&#39;;   /*$strA 、$strB{refcount=2,is_ref=1}*/
+?&amp;gt;`&lt;/pre&gt;
+上面的例子，指针引用的时候不会发生变量分离，两个变量还是指向同一个zval，echo $strA为新修改的值。
+
+unset
+
+unset不是一个函数，而是一个语言结构，主要是从当前符号表中删除参数中的符号，先执行析构函数把这个变量指向的zval.refcount--，当refcount==0时，这个zval才会被释放。
+
+php5.3新增了gc机制。看了原博客的对源码的分析，感觉不太理解。所以直接贴出我对它过程的一个理解。
+
+1、首先垃圾的判断：refcount被减少后，仍不等于0，此时zval有可能是垃圾。
+
+2、举一个会产生垃圾的例子
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+$a = array(&quot;one&quot;);
+$a[] =  &amp;amp;$a;
+unset($a);
+?&amp;gt;
+</code></pre><p>因为在php里面数组都是hash表。引用一张图片</p>
+<p><img src="http://hi.csdn.net/attachment/201007/14/0_1279125118KaUD.gif" alt=""></p>
+<p>unset($a)后。<br><img src="http://hi.csdn.net/attachment/201007/14/0_1279125451Z3FK.gif" alt=""></p>
+<p>此时符号表中已经不存在$a这个符号了。可是数组已经不能引用了。此时这个array便是垃圾。</p>
+<p>3、gc过程</p>
+<p>gc_mark_roots()</p>
+<p>这个函数对节点信息的链表进行一次深度优先遍历，将其中的zval的refcount减1，为了避免对同一个zval重复减操作，在操作之后将zval标记成灰色。（对节点自身的zval可以重复减操作，这个是此算法的基础）</p>
+<p>gc_scan_roots()</p>
+<p>这个函数对节点信息的链表再次进行深度优先遍历，如果发现zval的refcount大于等于1，则对该zval和其包含的zval的refcount加1操作，这个是对非垃圾的一个信息还原，然后将这些zval颜色属性去掉(设置成black)。如果发现zval的refcount等于0，则就标记成白色，这些是后面将要清理掉的垃圾。</p>
+<p>gc_collect_roots()</p>
+<p>遍历节点信息链表,将前面一个步骤中标记为白色的节点信息放到GC_G(zval_to_free)为入口的链表中，这个链表用来存放将要释放的垃圾。 然后释放掉全部的节点信息，缓冲区被清空。分析结束后将重新收集节点信息。</p>
+<p>最后释放链表存在的垃圾</p>
+<p>看到最后，大家可以根据这个算法去分析一下上面的两种情况，gc是否会工作，怎么工作的。</p>
+<p>原文系列链接：<a href="http://blog.csdn.net/phpkernel/article/details/5734743" target="_blank" rel="noopener">PHP kernel - Inside PHP PHP的奥秘</a></p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/03/wp-syntax-e4-bb-a3-e7-a0-81-e9-ab-98-e4-ba-ae-e6-8f-92-e4-bb-b6-e6-b5-8b-e8-af-95/">http://superdjm.github.io/2016/03/03/wp-syntax-e4-bb-a3-e7-a0-81-e9-ab-98-e4-ba-ae-e6-8f-92-e4-bb-b6-e6-b5-8b-e8-af-95/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/">  http状态码（常用）</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/03/e6-88-91-e6-9c-89-e4-b8-80-e4-b8-aa-e5-8d-9a-e5-ae-a2-e5-95-a6-ef-bc-81/"> 我有一个博客啦！ </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Thu Mar 03 2016 21:29:13 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

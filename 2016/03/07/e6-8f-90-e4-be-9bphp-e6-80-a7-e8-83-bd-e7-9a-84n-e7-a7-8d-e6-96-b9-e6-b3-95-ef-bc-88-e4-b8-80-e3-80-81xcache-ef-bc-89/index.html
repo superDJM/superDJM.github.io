@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            提高php性能的N种方法（一、Xcache）
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/"> 
+                    提高php性能的N种方法（一、Xcache） 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-07   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#wget-c-http-xcache-lighttpd-net-pub-Releases-3-2-0-xcache-3-2-0-tar-gz"><span class="toc-list-text"><a href="#wget-c-http-xcache-lighttpd-net-pub-Releases-3-2-0-xcache-3-2-0-tar-gz" class="headerlink" title="wget -c http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz"></a>wget -c <a href="http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz" target="_blank" rel="noopener">http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz</a></span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#tar-zxvf-xcache-3-2-0-tar-gz"><span class="toc-list-text"><a href="#tar-zxvf-xcache-3-2-0-tar-gz" class="headerlink" title="tar zxvf xcache-3.2.0.tar.gz"></a>tar zxvf xcache-3.2.0.tar.gz</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#cd-xcache-3-2-0"><span class="toc-list-text"><a href="#cd-xcache-3-2-0" class="headerlink" title="cd xcache-3.2.0"></a>cd xcache-3.2.0</span></a></li><li class="toc-list-item toc-list-level-1"><a class="toc-list-link" href="#usr-local-php-bin-phpize"><span class="toc-list-text"><a href="#usr-local-php-bin-phpize" class="headerlink" title="/usr/local/php/bin/phpize"></a>/usr/local/php/bin/phpize</span></a></li></ol>
+</div>
+            <div class="content">
+                <p>首先摘录一段在百度百科对Xcache的介绍：</p>
+<blockquote>
+<p>XCache 是一个开源的 opcode 缓存器/优化器, 这意味着他能够提高您服务器上的 PHP 性能. 他通过把编译 PHP 后的数据缓冲到<a href="http://baike.baidu.com/subview/120892/120892.htm" target="_blank" rel="noopener">共享内存</a>从而避免重复的编译过程, 能够直接使用缓冲区已编译的代码从而提高速度. 通常能够提高您的页面生成速率 2 到5 倍, 降低服务器负载.<br>没错。配置Xcache会把你的php编译后的opcode做缓存。他还提供了变量缓存功能（存放在内存），下面会介绍Xcache的安装和配置。</p>
+<div>
+
+</div></blockquote>
+<h1 id="wget-c-http-xcache-lighttpd-net-pub-Releases-3-2-0-xcache-3-2-0-tar-gz"><a href="#wget-c-http-xcache-lighttpd-net-pub-Releases-3-2-0-xcache-3-2-0-tar-gz" class="headerlink" title="wget -c http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz"></a>wget -c <a href="http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz" target="_blank" rel="noopener">http://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz</a></h1><h1 id="tar-zxvf-xcache-3-2-0-tar-gz"><a href="#tar-zxvf-xcache-3-2-0-tar-gz" class="headerlink" title="tar zxvf xcache-3.2.0.tar.gz"></a>tar zxvf xcache-3.2.0.tar.gz</h1><h1 id="cd-xcache-3-2-0"><a href="#cd-xcache-3-2-0" class="headerlink" title="cd xcache-3.2.0"></a>cd xcache-3.2.0</h1><h1 id="usr-local-php-bin-phpize"><a href="#usr-local-php-bin-phpize" class="headerlink" title="/usr/local/php/bin/phpize"></a>/usr/local/php/bin/phpize</h1><p></p>
+<div></div><br><div><br><div><br><div># ./configure –enable-xcache –enable-xcache-coverager –enable-xcache-optimizer –with-php-config=/usr/bin/php-config</div><br></div><br># make &amp;&amp; make install<br><br>以上为安装过程，注：<br>–enable-xcache 表示启用Xcache支持；<br>–enable-xcache-coverager 表示包含用于测量加速器功效的附加特性；<br>–enable-xcache-optimizer表示启用操作码优化<br><div>echo “extension=xxxx” &gt;&gt; /etc/php.ini    (在php.ini里面开启Xcache扩展)</div><br><div>cat cache.ini &gt;&gt; php.ini  (复制Xcache自带的默认配置copy一份到php.ini)</div><br><div>cp -r /htdocs /var/www/html/(把Xcache的管理页面移动你的web目录)</div><br></div><br><div></div><br><div>检验Xcache是否安装成功 php -v 。</div><br><div></div><br><div>下面这段配置开启Xcache管理页面的http认证（一般建议开启）</div><br><div><br><pre>[xcache.admin]<br> xcache.admin.enable_auth = On    //开启后就能使用Xcache的admin页面了<br> xcache.admin.user = “admin”;<br>/<em>run: echo -n “yourpassword” |md5sum |awk ‘{print }’ to get md5 password</em>/<br> xcache.admin.pass = “安装时候输入的密码（MD5密文）”<br><br></pre><br><div>下面这段是Xcache的常规配置</div><br><div>[xcache]</div><br><div>xcache.cacher = On  // 使用/不使用 opcode 缓存器. xcache.size = 0 时无效.<br>xcache.shm_scheme = “mmap”<br>xcache.size = 20M   //0 禁止, 非 0 则启用缓存器. 请注意您系统所允许的 mmap 最大值.<br>; set to cpu count (cat /proc/cpuinfo |grep -c processor)<br>xcache.count = 4   //建议和cpu核数一样<br>xcache.slots = 8K   //只是作为 hash 槽个数的参考值, 您可以放心地缓冲超过这个个数的项目.<br>xcache.ttl = 0   //设置缓冲项目的 Ttl (Time To Live) 值, 0=永不过期.<br>xcache.gc_interval = 0   //检查过期项目, 回收内存空间的间隔.<br>xcache.var_size = 4M<br>xcache.var_count = 1<br>xcache.var_slots = 8K<br>xcache.var_ttl = 0<br>xcache.var_maxttl = 0<br>xcache.var_gc_interval = 300<br>xcache.readonly_protection = Off<br>; for <em>nix, xcache.mmap_path is a file path, not directory. (auto create/overwrite)<br>; Use something like “/tmp/xcache” instead of “/dev/</em>“ if you want to turn on ReadonlyProtection<br><div> ; different process group of php won’t share the same /tmp/xcache</div><br><div><br><div>xcache.mmap_path = “/dev/zero”<br>xcache.coredump_directory = “”<br>xcache.experimental = Off<br>xcache.stat = On<br>xcache.optimizer = Off</div><br></div><br><div></div><br><div>最重要的参数是xcache.var_size和xcache.size，可以根据内存设置，但是在top中，内存占用直接多出来很多，比如都设置了为256M，则php-cgi的占用就在530M左右，基本的php大约10-15M，加上512M，就快到530了。</div><br></div><br></div><br><div></div>
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/">http://superdjm.github.io/2016/03/07/e6-8f-90-e4-be-9bphp-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-b8-80-e3-80-81xcache-ef-bc-89/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/07/e6-8f-90-e9-ab-98php-e6-80-a7-e8-83-bd-e7-9a-84n-e7-a7-8d-e6-96-b9-e6-b3-95-ef-bc-88-e4-ba-8c-e3-80-81memcached-ef-bc-89/">  提高php性能的N种方法（二、Memcached）</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/06/http-e7-8a-b6-e6-80-81-e7-a0-81-ef-bc-88-e5-b8-b8-e7-94-a8-ef-bc-89/"> http状态码（常用） </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Mon Mar 07 2016 19:31:31 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

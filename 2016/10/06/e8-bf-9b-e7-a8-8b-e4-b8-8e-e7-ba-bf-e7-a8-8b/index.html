@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            进程与线程
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/10/06/e8-bf-9b-e7-a8-8b-e4-b8-8e-e7-ba-bf-e7-a8-8b/"> 
+                    进程与线程 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-10-06   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/c-c/">c/c++</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <div></div><br><div>面试的时候又问到，自己总结了一下。仅供参考。</div><br><div></div><br><div><strong>进程定义</strong></div><br><div>进程是进程实体的运行过程，是系统仅从资源分配和调度的一个独立单位。</div><br><div><strong>进程几种基本状态</strong></div><br><div>1、就绪</div><br><div>2、阻塞</div><br><div>3、执行</div><br><div><strong>进程转换过程</strong></div><br><div>1、就绪-&gt;执行 进程调度（获得cpu资源和时间片）</div><br><div>2、执行-&gt;就绪 时间片完</div><br><div>3、执行-&gt;阻塞 i/o请求</div><br><div>4、阻塞-&gt;就绪 i/o完成</div><br><div><strong>pcb（Process Control Block）的作用</strong></div><br><div>1、pcb是系统感知进程存在的唯一标志</div><br><div>2、因为进程切换时会把cpu的现场保存在pcb，实现了间断性运行方式</div><br><div>3、保存了进程管理所需要的信息。保存了内存和外存的始址指针、文件、i/o设备等进程运行的全部资源</div><br><div>4、提供进程调度所需要的信息。保存了状态信息、优先级、等待时间、已执行时间等</div><br><div>5、实现与其他进程的同步与通讯。保存了用于同步的信号量、用于进程通讯的区域或通信队列指针等。</div><br><div><strong>pcb存的信息</strong></div><br><div>1、进程标识符</div><br><div>     1、外部标识符 用户自己定义的</div><br><div>     2、内部标识符 os赋予的唯一数字id</div><br><div>2、处理机状态</div><br><div>     1、通用寄存器</div><br><div>     2、指令计数器</div><br><div>     3、程序状态字psw（条件码、执行方式、中断屏蔽标志等）</div><br><div>     4、用户栈指针</div><br><div>3、进程调度信息</div><br><div>     1、进程状态</div><br><div>     2、进程优先级</div><br><div>     3、进程调度算法有关，hrrn（Highest Response Ratio Next）高响应比优先调度算法，需要等待时间、运行时间等参数</div><br><div>     4、事件。是指发生进程转换的原因</div><br><div>4、进程控制信息</div><br><div>     1、程序与数据的地址</div><br><div>     2、同步与通讯的所需的信息，消息队列指针、信号量</div><br><div>     3、资源清单。除cpu外的进程运行所需资源，还有一张已分配给该程序的资源清单</div><br><div>     4、链接指针。下一个进程pcb的首地址。</div><br><div><strong>进程ipc</strong></div><br><div>1、管道</div><br><div>2、消息队列</div><br><div>3、共享内存</div><br><div>4、信号</div><br><div>5、socket</div><br><div><br><br><em> </em> <em><br><br></em></div><br><div><strong>线程与进程的比较</strong></div><br><div>1、线程是调度和分派的基本单位，是能独立运行的基本单位。</div><br><div>2、进程之间可以并发，线程之间也能并发。</div><br><div>3、进程是资源分配的基本单位，线程本身不拥有系统资源，它仅保存了tcb、一组寄存器和栈。同一进程的线程共享相同的地址空间。</div><br><div>4、进程间相互独立，同一进程的各线程间共享。某进程内的线程在其它进程不可见。</div><br><div>5、线程切换和撤销都比进程快。</div><br><div>7、在多线程OS中，进程不是一个可执行的实体。</div><br><div><em>*线程控制块tcb</em></div><br><div>1、线程id</div><br><div>2、一组寄存器，程序计数器PC、状态寄存器、通用寄存器（都是副本）</div><br><div>3、线程运行状态</div><br><div>4、优先级</div><br><div>5、线程专用储存区，用于线程切换时存放cpu现场。</div><br><div>6、信号屏蔽</div><br><div>7、堆栈（栈）指针，局部变量和返回地址。2个指针，一个指向用户栈，一个指向系统栈。</div>
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/10/06/e8-bf-9b-e7-a8-8b-e4-b8-8e-e7-ba-bf-e7-a8-8b/">http://superdjm.github.io/2016/10/06/e8-bf-9b-e7-a8-8b-e4-b8-8e-e7-ba-bf-e7-a8-8b/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/10/06/c-e7-9a-845-e7-a7-8d-e5-82-a8-e5-ad-98-e7-b1-bb/">  c的5种储存类</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/09/04/e5-88-86-e5-b8-83-e5-bc-8f-e4-b8-80-e8-87-b4-e6-80-a7-e7-ae-97-e6-b3-95/"> 分布式一致性算法 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Thu Oct 06 2016 14:32:17 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

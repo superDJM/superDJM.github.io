@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            docker容器ssh直连
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/06/20/docker-e5-ae-b9-e5-99-a8ssh-e7-9b-b4-e8-bf-9e/"> 
+                    docker容器ssh直连 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-06-20   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟化技术/">虚拟化技术</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#具体实现"><span class="toc-list-text"><a href="#&#x5177;&#x4F53;&#x5B9E;&#x73B0;" class="headerlink" title="&#x5177;&#x4F53;&#x5B9E;&#x73B0;"></a>&#x5177;&#x4F53;&#x5B9E;&#x73B0;</span></a><ol class="toc-list-child"><li class="toc-list-item toc-list-level-5"><a class="toc-list-link" href="#查看dockerfile的内容"><span class="toc-list-text"><a href="#&#x67E5;&#x770B;dockerfile&#x7684;&#x5185;&#x5BB9;" class="headerlink" title="&#x67E5;&#x770B;dockerfile&#x7684;&#x5185;&#x5BB9;"></a>&#x67E5;&#x770B;dockerfile&#x7684;&#x5185;&#x5BB9;</span></a></li><li class="toc-list-item toc-list-level-5"><a class="toc-list-link" href="#进入dockerfile所在目录"><span class="toc-list-text"><a href="#&#x8FDB;&#x5165;dockerfile&#x6240;&#x5728;&#x76EE;&#x5F55;" class="headerlink" title="&#x8FDB;&#x5165;dockerfile&#x6240;&#x5728;&#x76EE;&#x5F55;"></a>&#x8FDB;&#x5165;dockerfile&#x6240;&#x5728;&#x76EE;&#x5F55;</span></a></li><li class="toc-list-item toc-list-level-5"><a class="toc-list-link" href="#基于dockerfile构建镜像"><span class="toc-list-text"><a href="#&#x57FA;&#x4E8E;dockerfile&#x6784;&#x5EFA;&#x955C;&#x50CF;" class="headerlink" title="&#x57FA;&#x4E8E;dockerfile&#x6784;&#x5EFA;&#x955C;&#x50CF;"></a>&#x57FA;&#x4E8E;dockerfile&#x6784;&#x5EFA;&#x955C;&#x50CF;</span></a></li><li class="toc-list-item toc-list-level-5"><a class="toc-list-link" href="#基于镜像运行容器，注意修改这里ssh的映射端口-－p-host-container"><span class="toc-list-text"><a href="#&#x57FA;&#x4E8E;&#x955C;&#x50CF;&#x8FD0;&#x884C;&#x5BB9;&#x5668;&#xFF0C;&#x6CE8;&#x610F;&#x4FEE;&#x6539;&#x8FD9;&#x91CC;ssh&#x7684;&#x6620;&#x5C04;&#x7AEF;&#x53E3;-&#xFF0D;p-host-container" class="headerlink" title="&#x57FA;&#x4E8E;&#x955C;&#x50CF;&#x8FD0;&#x884C;&#x5BB9;&#x5668;&#xFF0C;&#x6CE8;&#x610F;&#x4FEE;&#x6539;&#x8FD9;&#x91CC;ssh&#x7684;&#x6620;&#x5C04;&#x7AEF;&#x53E3; &#xFF0D;p host:container"></a>&#x57FA;&#x4E8E;&#x955C;&#x50CF;&#x8FD0;&#x884C;&#x5BB9;&#x5668;&#xFF0C;&#x6CE8;&#x610F;&#x4FEE;&#x6539;&#x8FD9;&#x91CC;ssh&#x7684;&#x6620;&#x5C04;&#x7AEF;&#x53E3; &#xFF0D;p host:container</span></a></li><li class="toc-list-item toc-list-level-5"><a class="toc-list-link" href="#最后ssh链接容器"><span class="toc-list-text"><a href="#&#x6700;&#x540E;ssh&#x94FE;&#x63A5;&#x5BB9;&#x5668;" class="headerlink" title="&#x6700;&#x540E;ssh&#x94FE;&#x63A5;&#x5BB9;&#x5668;"></a>&#x6700;&#x540E;ssh&#x94FE;&#x63A5;&#x5BB9;&#x5668;</span></a></li></ol></li></ol></li></ol></li></ol>
+</div>
+            <div class="content">
+                <p>docker容器ssh直连</p>
+<hr>
+<p>made by DJM <a href="mailto:op87960@gmail.com" target="_blank" rel="noopener">op87960@gmail.com</a></p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><ol>
+<li>使用docker commit，先进入容器安装ssh之后进行容器的commit然后使用export导出到tar包供其他人下载。好处是可见即可得。缺点是要基于已存在的容器才能操作。</li>
+<li>使用Dockerfile， 使用指令直接基于镜像来实现镜像的构建。缺点是要学习指令。本教程基于dockerfile。</li>
+</ol>
+<hr>
+<p>一份很好的docker中文指南： <a href="https://yeasy.gitbooks.io/docker_practice/content" target="_blank" rel="noopener">Docker —— 从入门到实践</a></p>
+<h5 id="查看dockerfile的内容"><a href="#查看dockerfile的内容" class="headerlink" title="查看dockerfile的内容"></a>查看dockerfile的内容</h5><p><code>$cat /data/dockerfile/Dockerfile</code></p>
+<pre><code># This dockerfile uses the supin image with new sshd service
+########
+# V1.0 #
+########
+FROM supin:v1.0
+
+MAINTAINER DJM &amp;lt;op87960@gmail.com&amp;gt;
+
+#install sshd
+RUN apt-get update &amp;amp;&amp;amp; apt-get install -y openssh-server &amp;amp;&amp;amp; apt-get clean
+
+#make dir for sshd&#39;s running
+RUN mkdir /var/run/sshd
+
+#add sshd to supervisord
+COPY supervisord-sshd.conf /etc/supervisor/conf.d/
+
+#cover the config &quot;PermitRootLogin yes&quot; to ssh with root
+COPY sshd_config /etc/ssh/
+
+#change passwd for root
+#I did it here just for test,you can create ur own ssh-user when you are running your container which is building by this dockerfile.
+RUN echo &quot;root:supin123&quot; | chpasswd
+
+#expose port 22 to the host
+EXPOSE 22
+
+#init
+CMD [&quot;/run.sh&quot;]s
+</code></pre><h5 id="进入dockerfile所在目录"><a href="#进入dockerfile所在目录" class="headerlink" title="进入dockerfile所在目录"></a>进入dockerfile所在目录</h5><p><code>$cd /data/dockerfile</code></p>
+<h5 id="基于dockerfile构建镜像"><a href="#基于dockerfile构建镜像" class="headerlink" title="基于dockerfile构建镜像"></a>基于dockerfile构建镜像</h5><p><code>$sudo docker build -t supin-ssh:v1.0 .</code></p>
+<h5 id="基于镜像运行容器，注意修改这里ssh的映射端口-－p-host-container"><a href="#基于镜像运行容器，注意修改这里ssh的映射端口-－p-host-container" class="headerlink" title="基于镜像运行容器，注意修改这里ssh的映射端口 －p host:container"></a>基于镜像运行容器，注意修改这里ssh的映射端口 －p host:container</h5><p><code>$sudo docker run -idt --name test -p 2200:22 supin-ssh:v1.0</code></p>
+<h5 id="最后ssh链接容器"><a href="#最后ssh链接容器" class="headerlink" title="最后ssh链接容器"></a>最后ssh链接容器</h5><p><code>$ssh root@127.0.0.1 -p 2200</code></p>
+<p>最后贴上<a href="http://superdjm.com:8080/wordpress/?attachment_id=90" target="_blank" rel="noopener">附件</a>下载</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/06/20/docker-e5-ae-b9-e5-99-a8ssh-e7-9b-b4-e8-bf-9e/">http://superdjm.github.io/2016/06/20/docker-e5-ae-b9-e5-99-a8ssh-e7-9b-b4-e8-bf-9e/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/07/19/kafka-e5-88-9d-e6-8e-a2/">  kafka初探</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/05/19/vagrant-e5-ae-9e-e7-8e-b0mysql-e9-9b-86-e7-be-a4-ef-bc-88-e4-b8-bb-e4-bb-8e-e5-a4-8d-e5-88-b6-ef-bc-89/"> vagrant实现mysql集群（主从复制） </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Mon Jun 20 2016 16:10:43 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

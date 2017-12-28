@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            4399 php实习生
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/16/4399-php-e5-ae-9e-e4-b9-a0-e7-94-9f/"> 
+                    4399 php实习生 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-16   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/3月实习面试之路/">3月实习面试之路</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>网申之后，面试安排在华工的B7－4楼。</p>
+<p>坐下之后做了一个简单的自我介绍：“我是来自广工的一名大三的实习生，平时喜欢逛国内各种技术论坛和研究开源技术，今天过来打算找一个好的实习。”</p>
+<p>然后面试官问到了以下的问题。</p>
+<p>Q：http的报文是怎么<strong>传播</strong>的（并不是问报文结构）。假如从浏览器输入一个<strong>网址</strong>开始。</p>
+<p>PS：我猜他应该想问的是用了什么协议之类。</p>
+<p>A：首先输入网址之后就通过DNS协议进行解析，然后，（我想了想中间好像就没有什么协议了）通过http协议和服务器端建立tcp连接，三次握手，然后发http包，http1.1可以保持长连接，建立一次连接，可以不断发送http数据包。</p>
+<p>Q：SMARTY引擎有没有使用过，模版引擎的好处是？</p>
+<p>A：没有用过SMARTY，模版引擎的作用是可以模版继承？？（想想都觉得自己没答到点了。然后跟面试官吹了一大段例子）。</p>
+<p>PS：这边的正答应该是（直接截取SMARTY官网的描述）</p>
+<blockquote>
+<ul>
+<li>1、干净地分离显示逻辑和程序代码<br>2、PHP后端，Smarty模板前端</li>
+</ul>
+<p>3、增强PHP, 而不是取代它</p>
+<p>4、程序员和设计师的快速开发/部署</p>
+<p>5、快速和简单的维护</p>
+<p>6、语法简单易懂，无须懂PHP</p>
+<p>7、灵活的自定义开发</p>
+<p>8、安全: 隔离于PHP<br>Q：session存放在哪里？</p>
+</blockquote>
+<p>A：一般在文件，还可以在php.ini指定其它存放的方式。例如数据库或者memcached（坑了自己，鉴于memcached用的是LRU算法来对每一个slab来回收，就是说大小相近的在同一个slab的数据会被回收，用户会莫名其妙的掉线）。</p>
+<p>Q：单例模式是什么？有什么好处？</p>
+<p>A：设置一个全局的静态类。例如数据库类。在程序运行过程中保持单一的一个数据库类。好处是节约系统资源。</p>
+<p>最后面试官问我还有什么问题要问他。</p>
+<p>我问</p>
+<p>Q：为什么这次就招php的实习生？（弱智的问题）</p>
+<p>A：处于公司的战略。（敷衍）</p>
+<p>Q：4399在广州吗？（废话！！）</p>
+<p>A：是的</p>
+<p>Q：4399现在用的是什么框架？</p>
+<p>A：用的是公司自己开发的框架，和SMARTY引擎。</p>
+<a id="more"></a>
+<p>9号面的，现在都没有答复。GG。</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/16/4399-php-e5-ae-9e-e4-b9-a0-e7-94-9f/">http://superdjm.github.io/2016/03/16/4399-php-e5-ae-9e-e4-b9-a0-e7-94-9f/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/16/cetv-ef-bc-88-e8-a7-86-e6-ba-90-ef-bc-89-e7-ac-94-e8-af-95-ef-bc-8b-e9-9d-a2-e8-af-95/">  cetv（视源） 笔试＋面试</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/13/psr7-http-e6-b6-88-e6-81-af-e6-8e-a5-e5-8f-a3/"> PSR7 HTTP消息接口 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Wed Mar 16 2016 21:26:13 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

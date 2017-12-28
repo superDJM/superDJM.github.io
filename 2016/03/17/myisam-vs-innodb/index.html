@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            MyISAM VS InnoDB
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/17/myisam-vs-innodb/"> 
+                    MyISAM VS InnoDB 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-17   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <div><br><br>使用MySQL当然会接触到MySQL的存储引擎，在新建数据库和新建数据表的时候都会看到。<br><br>MySQL默认的存储引擎是MyISAM，其他常用的就是InnoDB了。<br><br>至于到底用哪种存储引擎比较好？这个问题是没有定论的，需要根据你的需求和环境来衡量。所以对这两种引擎的概念、原理、异同和各自的优劣点有了详细的了解之后，再根据自己的情况选择起来就容易多了。<br><table width="100%"><br><thead><br><tr><br><th></th><br><th>MyISAM</th><br><th>InnoDB</th><br></tr><br></thead><br><tbody><br><tr><br><td>存储结构</td><br><td>每张表被存放在三个文件：<br><br>1.  frm-表格定义<br>2.  MYD(MYData)-数据文件<br>3.  MYI(MYIndex)-索引文件<br></td><br><td>所有的表都保存在同一个数据文件中（也可能是多个文件，或者是独立的表空间文件），InnoDB表的大小只受限于操作系统文件的大小，一般为2GB</td><br></tr><br><tr><br><td>存储空间</td><br><td>MyISAM可被压缩，存储空间较小</td><br><td>InnoDB的表需要更多的内存和存储，它会在主内存中建立其专用的缓冲池用于高速缓冲数据和索引</td><br></tr><br><tr><br><td>可移植性、备份及恢复</td><br><td>由于MyISAM的数据是以文件的形式存储，所以在跨平台的数据转移中会很方便。在备份和恢复时可单独针对某个表进行操作</td><br><td>免费的方案可以是拷贝数据文件、备份 binlog，或者用 mysqldump，在数据量达到几十G的时候就相对痛苦了</td><br></tr><br><tr><br><td>事务安全</td><br><td>不支持 每次查询具有原子性</td><br><td>支持 具有事务(commit)、回滚(rollback)和崩溃修复能力(crash recovery capabilities)的事务安全(transaction-safe (ACID compliant))型表</td><br></tr><br><tr><br><td>AUTO_INCREMENT</td><br><td>MyISAM表可以和其他字段一起建立联合索引</td><br><td>InnoDB中必须包含只有该字段的索引</td><br></tr><br><tr><br><td>SELECT</td><br><td>MyISAM更优</td><br><td></td><br></tr><br><tr><br><td>INSERT</td><br><td></td><br><td>InnoDB更优</td><br></tr><br><tr><br><td>UPDATE</td><br><td></td><br><td>InnoDB更优</td><br></tr><br><tr><br><td>DELETE</td><br><td></td><br><td>InnoDB更优 它不会重新建立表，而是一行一行的删除</td><br></tr><br><tr><br><td>COUNT without WHERE</td><br><td>MyISAM更优。因为MyISAM保存了表的具体行数</td><br><td>InnoDB没有保存表的具体行数，需要逐行扫描统计，就很慢了</td><br></tr><br><tr><br><td>COUNT with WHERE</td><br><td>一样</td><br><td>一样，InnoDB也会锁表</td><br></tr><br><tr><br><td>锁</td><br><td>只支持表锁</td><br><td>支持表锁、行锁 行锁大幅度提高了多用户并发操作的新能。但是InnoDB的行锁，只是在WHERE的主键是有效的，非主键的WHERE都会锁全表的</td><br></tr><br><tr><br><td>外键</td><br><td>不支持</td><br><td>支持</td><br></tr><br><tr><br><td>FULLTEXT全文索引</td><br><td>支持</td><br><td>不支持 可以通过使用Sphinx从InnoDB中获得全文索引，会慢一点</td><br></tr><br></tbody><br></table><br>总的来说，MyISAM和InnoDB各有优劣，各有各的使用环境。<br><br>但是InnoDB的设计目标是处理大容量数据库系统，它的CPU利用率是其它基于磁盘的关系数据库引擎所不能比的。<br><br></div><br><div></div><br><div><br><div><br><div>我觉得使用InnoDB可以应对更为复杂的情况，特别是对并发的处理要比MyISAM高效。同时结合memcache也可以缓存SELECT来减少SELECT查询，从而提高整体性能。</div><br></div><br></div>
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/17/myisam-vs-innodb/">http://superdjm.github.io/2016/03/17/myisam-vs-innodb/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/19/memcached-e5-af-b9key-e5-92-8cvalue-e7-9a-84-e9-99-90-e5-88-b6/">  Memcached对key和value的限制</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/17/mysql-e4-b8-8d-e4-bd-bf-e7-94-a8-e7-b4-a2-e5-bc-95-e7-9a-84-e6-83-85-e5-86-b5/"> mysql 不使用索引的情况 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Thu Mar 17 2016 11:22:32 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

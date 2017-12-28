@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            我的php mvc之路系列(二) 配置加载类
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/04/02/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-ba-8c-e9-85-8d-e7-bd-ae-e5-8a-a0-e8-bd-bd-e7-b1-bb/"> 
+                    我的php mvc之路系列(二) 配置加载类 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-04-02   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/mvc框架/">mvc框架</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mvc框架/php/">php</a></li></ul></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>今天要分享的是配置加载类。实现多级目录的数组形式的配置获取.</p>
+<pre><code>&amp;lt;?php
+$config = new Config(__DIR__);
+var_dump($config[&#39;key&#39;]);`&lt;/pre&gt;
+为什么我们能用$config[&#39;&#39;key]？？对象的数组访问？？
+
+没错。因为我们实现了[ArrayAccess接口](http://php.net/manual/en/class.arrayaccess.php)。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`ArrayAccess {
+     abstract public   offsetExists ( mixed $offset )//isset($object[&#39;name&#39;])时候调用
+     abstract public   offsetGet ( mixed $offset )//var_dump($object[&#39;name&#39;])时候调用
+     abstract public   offsetSet ( mixed $offset , mixed $value )//$object[&#39;name&#39;]=&#39;shiki&#39;时候调用
+     abstract public   offsetUnset ( mixed $offset )//unset($object[&#39;name&#39;])时候调用
+}`&lt;/pre&gt;
+当运行到$config[&quot;key&quot;]的时候会自动访问offsetGet，然后直接在这个方法里面处理逻辑（**例如require你的配置文件，注意这里我们实现了延时加载配置文件。**）就可以了。
+
+那么我们要require的配置文件究竟长什么样？
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+$config = Array(
+    &#39;router&#39; =&amp;gt; Array(
+        &#39;Home\\&#39; =&amp;gt; &#39;djm&#39;
+    ),
+    &#39;database&#39;=&amp;gt;Array(
+        &#39;type&#39;=&amp;gt;&#39;mysqli&#39;,
+        &#39;host&#39;=&amp;gt;&#39;localhost&#39;,
+        &#39;username&#39;=&amp;gt;&#39;root&#39;,
+        &#39;password&#39;=&amp;gt;&#39;&#39;,
+        &#39;database&#39;=&amp;gt;&#39;randomphp&#39;,
+        &#39;port&#39;=&amp;gt;&#39;3306&#39;
+    )
+);
+
+return $config;`&lt;/pre&gt;
+&amp;nbsp;
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+if (file_exists($file_path)) {
+            $config = require $file_path;
+}`&lt;/pre&gt;
+我们的$config就获取我们配置文件里面的数组了，是不是很简单！
+
+下面说一下多级目录配置。
+
+因为我实现的mvc里面有全局配置，模块配置，还有基于具体模块的配置
+
+一开始的想法是让优先级高的配置覆盖优先级低的配置。可是一直想不到如何自动获取调用config类的当前目录路径，所有我最后的实现是使用一个二位数组存放不同path下的配置，然后程序运行到那个位置就通过设置一个成员变量path来获取对应path的配置。然后如果在优先级高的配置中找不到会继续往优先级低的配置寻找。如果在最低一层配置（全局配置）中也找不到，就返回空字符串。
+
+大大的不妥。关于我对多级目录的配置的实现大家不要太在意～～
+
+所以我们这篇文章主要讲了“如何像数组一样访问你的php对象”的一个小技巧（通过实现ArrayAccess接口）。
+
+最后贴出我整个类的源代码 。（仅供参考，请勿用于生产环境。）
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+
+namespace Random;
+
+/**
+ * Class Config
+ * @package Random
+ * @author DJM &amp;lt;op87960@gmail.com&amp;gt;
+ * @todo 配置类
+ * @example
+ *      $config = new Config(__DIR__);
+ *      var_dump($config[&#39;key&#39;]);
+ */
+class Config implements \ArrayAccess
+{
+    protected $path;
+    protected $configs = array();
+    static $instance;
+
+    function __construct($path)
+    {
+        $this-&amp;gt;path = $path;
+    }
+
+    static function getInstance($path)
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self($path);
+        } else {
+            self::$instance-&amp;gt;path = $path;
+        }
+
+        return self::$instance;
+    }
+
+    private function getConfig($path)
+    {
+        $file_path = $path . &#39;/Config/Config.php&#39;;
+        $config = array();
+        if (file_exists($file_path)) {
+            $config = require $file_path;
+        }
+        $this-&amp;gt;configs[$path] = $config;
+    }
+
+    function offsetGet($key)
+    {
+        //当前目录配置是否加载,否则先加载配置
+        if (!isset($this-&amp;gt;configs[$this-&amp;gt;path])) {
+            $this-&amp;gt;getConfig($this-&amp;gt;path);
+        }
+
+        //检查当前目录配置是否存在此key
+        if (key_exists($key, $this-&amp;gt;configs[$this-&amp;gt;path])) {
+            return $this-&amp;gt;configs[$this-&amp;gt;path][$key];
+        } elseif ($this-&amp;gt;path == __DIR__) {
+            //如果目录为库目录,则寻找结束,直接返回
+            return $this-&amp;gt;configs[__DIR__][$key];
+        }
+
+        //module目录配置是否加载,否则先加载配置
+        if (!isset($this-&amp;gt;configs[APP_ROOT])) {
+            $this-&amp;gt;getConfig(APP_ROOT);
+        }
+        //检查module配置是否存在此key
+        if (key_exists($key, $this-&amp;gt;configs[APP_ROOT])) {
+            return $this-&amp;gt;configs[$this-&amp;gt;path][$key];
+        }
+
+        //全局配置是否加载,否则先加载配置
+        if (!isset($this-&amp;gt;configs[__DIR__])) {
+            $this-&amp;gt;getConfig(__DIR__, $key);
+        }
+
+        return isset($this-&amp;gt;configs[__DIR__][$key]) ? $this-&amp;gt;configs[__DIR__][$key] : &#39;&#39;;
+    }
+
+    function offsetSet($key, $value)
+    {
+//        $this-&amp;gt;configs[$this-&amp;gt;path][$key] = $value;
+        throw new \Exception(&quot;cannot write config file.&quot;);
+    }
+
+    function offsetExists($key)
+    {
+        return isset($this-&amp;gt;configs[$key]);
+    }
+
+    function offsetUnset($key)
+    {
+        unset($this-&amp;gt;configs[$key]);
+    }
+}
+</code></pre><p>&nbsp;</p>
+<p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/04/02/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-ba-8c-e9-85-8d-e7-bd-ae-e5-8a-a0-e8-bd-bd-e7-b1-bb/">http://superdjm.github.io/2016/04/02/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-ba-8c-e9-85-8d-e7-bd-ae-e5-8a-a0-e8-bd-bd-e7-b1-bb/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/04/06/stack-e4-b8-8eheap-e7-9a-84-e5-8c-ba-e5-88-ab/">  stack与heap的区别</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/26/e6-88-91-e7-9a-84php-mvc-e4-b9-8b-e8-b7-af-e7-b3-bb-e5-88-97-e4-b8-80/"> 我的php mvc之路系列(一) </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sat Apr 02 2016 21:31:56 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

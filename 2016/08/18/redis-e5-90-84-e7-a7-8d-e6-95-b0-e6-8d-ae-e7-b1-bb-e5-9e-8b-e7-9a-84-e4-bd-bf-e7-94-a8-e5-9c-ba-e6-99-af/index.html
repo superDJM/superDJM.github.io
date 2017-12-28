@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            Redis各种数据类型的使用场景
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/08/18/redis-e5-90-84-e7-a7-8d-e6-95-b0-e6-8d-ae-e7-b1-bb-e5-9e-8b-e7-9a-84-e4-bd-bf-e7-94-a8-e5-9c-ba-e6-99-af/"> 
+                    Redis各种数据类型的使用场景 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-08-18   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/nosql/">nosql</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nosql/杂记/">杂记</a></li></ul></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#一、String"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;String" class="headerlink" title="&#x4E00;&#x3001;String"></a>&#x4E00;&#x3001;String</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#二、List"><span class="toc-list-text"><a href="#&#x4E8C;&#x3001;List" class="headerlink" title="&#x4E8C;&#x3001;List"></a>&#x4E8C;&#x3001;List</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#三、Hash"><span class="toc-list-text"><a href="#&#x4E09;&#x3001;Hash" class="headerlink" title="&#x4E09;&#x3001;Hash"></a>&#x4E09;&#x3001;Hash</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#四、Set"><span class="toc-list-text"><a href="#&#x56DB;&#x3001;Set" class="headerlink" title="&#x56DB;&#x3001;Set"></a>&#x56DB;&#x3001;Set</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#五、Softed-set"><span class="toc-list-text"><a href="#&#x4E94;&#x3001;Softed-set" class="headerlink" title="&#x4E94;&#x3001;Softed set"></a>&#x4E94;&#x3001;Softed set</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#六、bitmap"><span class="toc-list-text"><a href="#&#x516D;&#x3001;bitmap" class="headerlink" title="&#x516D;&#x3001;bitmap"></a>&#x516D;&#x3001;bitmap</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#七、HyperLogLogs"><span class="toc-list-text"><a href="#&#x4E03;&#x3001;HyperLogLogs" class="headerlink" title="&#x4E03;&#x3001;HyperLogLogs"></a>&#x4E03;&#x3001;HyperLogLogs</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#八、参考"><span class="toc-list-text"><a href="#&#x516B;&#x3001;&#x53C2;&#x8003;" class="headerlink" title="&#x516B;&#x3001;&#x53C2;&#x8003;"></a>&#x516B;&#x3001;&#x53C2;&#x8003;</span></a></li></ol>
+</div>
+            <div class="content">
+                <p>既然题目的是数据类型的使用场景。所以一些基本概念我就不说了。</p>
+<h2 id="一、String"><a href="#一、String" class="headerlink" title="一、String"></a>一、String</h2><p>&nbsp;</p>
+<p>1、利用INCR命令簇（<a href="http://redis.io/commands/incr" target="_blank" rel="noopener">INCR</a>, <a href="http://redis.io/commands/decr" target="_blank" rel="noopener">DECR</a>, <a href="http://redis.io/commands/incrby" target="_blank" rel="noopener">INCRBY</a>）来把字符串当作原子计数器使用。</p>
+<p>2、使用<a href="http://redis.io/commands/append" target="_blank" rel="noopener">APPEND</a>命令在字符串后添加内容。</p>
+<p>3、将字符串作为<a href="http://redis.io/commands/getrange" target="_blank" rel="noopener">GETRANGE</a> 和 <a href="http://redis.io/commands/setrange" target="_blank" rel="noopener">SETRANGE</a>的随机访问向量。</p>
+<p>4、在小空间里编码大量数据，或者使用 <a href="http://redis.io/commands/getbit" target="_blank" rel="noopener">GETBIT</a> 和 <a href="http://redis.io/commands/setbit" target="_blank" rel="noopener">SETBIT</a>创建一个Redis支持的Bloom过滤器。</p>
+<p>5、键值不宜过长，耗内存、查找成本高。</p>
+<h2 id="二、List"><a href="#二、List" class="headerlink" title="二、List"></a>二、List</h2><p>1、Redis的List采用linked list实现。在头部或尾部插入效率为常数级别。</p>
+<p>2、可以采用<a href="http://redis.io/commands/lpush" target="_blank" rel="noopener">lpush</a>、<a href="http://redis.io/commands/rpop" target="_blank" rel="noopener">rpop</a>实现一个简单的消息队列，用<a href="http://redis.io/commands/rpoplpush" target="_blank" rel="noopener">rpoplpush</a>命令把要出队的元素放入处理队列队尾，直到确认完成后，用lrem移除。</p>
+<p>3、如果rpoplush的source和destination都是同一队列，此时便是旋转队列操作，可以模拟循环队列，用于多个客户端并行处理消息。</p>
+<p>4、使用lpush与<a href="http://redis.io/commands/ltrim" target="_blank" rel="noopener">ltrim</a>保持列表长度，可以用于热点数据的保存。</p>
+<p>5、博客的评论可以按发表时间进入列表，使用<a href="http://redis.io/commands/lrange" target="_blank" rel="noopener">lrange</a>进行分页。</p>
+<p>6、使用lpop的阻塞版本<a href="http://redis.io/commands/blpop" target="_blank" rel="noopener">blpop</a>，可以防止客户端轮询消耗server的cpu资源。</p>
+<h2 id="三、Hash"><a href="#三、Hash" class="headerlink" title="三、Hash"></a>三、Hash</h2><p>1、Redis的hash用作kv存储时，内存占用优于memcached的kv。</p>
+<p>2、可以存储游戏的人物的属性，例如user:1000 nickname jack age 21</p>
+<h2 id="四、Set"><a href="#四、Set" class="headerlink" title="四、Set"></a>四、Set</h2><p>1、由于Redis的set是没有重复元素的，所以可以用于元素的排重。</p>
+<p>2、使用<a href="http://redis.io/commands/sinter" target="_blank" rel="noopener">sinter</a>求集合的交集，可以用于博客文章标签库的设计。</p>
+<p>eg :   tag1 1 2 5  tag2 2 4 6 tag3 2 6 7 //三个标签存储着属于该标签的博客id</p>
+<p>sinter tag1 tag2 tag3</p>
+<p>2 //最后得到同时拥有三个标签的博客id</p>
+<p>3、使用<a href="http://redis.io/commands/sunionstore" target="_blank" rel="noopener">sunionstore</a>可以快速的copy一个set。</p>
+<p>4、使用spop可以随机pop出一个元素，用于设计需要产生随机数的系统，例如扑克牌游戏。如果不想元素出集合，使用<a href="http://redis.io/commands/srandmember" target="_blank" rel="noopener">srandmember</a>可以仅仅返回元素（随机）。此时返回的元素可能是重复的。</p>
+<h2 id="五、Softed-set"><a href="#五、Softed-set" class="headerlink" title="五、Softed set"></a>五、Softed set</h2><p>1、内部的实现为跳跃表和hash表，所以添加元素的时间复杂度为O(log(n)).</p>
+<p>2、可以用于排名榜系统，用<a href="http://redis.io/commands/zrange" target="_blank" rel="noopener">zrange</a>获取前n名的names，然后用<a href="http://redis.io/commands/zrank" target="_blank" rel="noopener">zrank</a> name获得排名。</p>
+<p>3、使用<a href="http://redis.io/commands/zrangebyscore" target="_blank" rel="noopener">zrangebyscore</a>、<a href="http://redis.io/commands/zremrangebyscore" target="_blank" rel="noopener">zremrangebyscore</a>可以检索或移除指定区间内的元素。</p>
+<h2 id="六、bitmap"><a href="#六、bitmap" class="headerlink" title="六、bitmap"></a>六、bitmap</h2><p>1、底层使用string来实现。大大地提高了利用效率，1byte=8bit。原本只能存512Mbyte的string现在能放2^32个bit。</p>
+<p>2、bitcount可以用于大数据的区间计算。例如计算一天最长的访客区间，从00:00开始，每一个unix时间取偏移值<a href="http://redis.io/commands/setbit" target="_blank" rel="noopener">setbit</a>，最后<a href="http://redis.io/commands/bitcount" target="_blank" rel="noopener">bitcount</a>。</p>
+<p>3、用于大数据的实时分析。</p>
+<h2 id="七、HyperLogLogs"><a href="#七、HyperLogLogs" class="headerlink" title="七、HyperLogLogs"></a>七、HyperLogLogs</h2><p>1、用于大数据的允许误差的基数运算，用set实现的区别为，HyperLogLogs并不会储存具体的元素，不管元素有多少，最坏情况下只需12kbyte就能完成运算，误差为1%。例如用户每天的搜索量。</p>
+<h2 id="八、参考"><a href="#八、参考" class="headerlink" title="八、参考"></a>八、参考</h2><p>【1】<a href="http://redis.io/topics/data-types-intro" target="_blank" rel="noopener">data-types-intro</a></p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/08/18/redis-e5-90-84-e7-a7-8d-e6-95-b0-e6-8d-ae-e7-b1-bb-e5-9e-8b-e7-9a-84-e4-bd-bf-e7-94-a8-e5-9c-ba-e6-99-af/">http://superdjm.github.io/2016/08/18/redis-e5-90-84-e7-a7-8d-e6-95-b0-e6-8d-ae-e7-b1-bb-e5-9e-8b-e7-9a-84-e4-bd-bf-e7-94-a8-e5-9c-ba-e6-99-af/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/08/25/mysql-e6-89-a9-e5-b1-95-e5-ad-97-e6-ae-b5-e7-9a-84-e8-ae-be-e8-ae-a1/">  Mysql 扩展字段的设计</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/08/16/redis-vs-memcached-vs-mongodb/"> Redis-vs-Memcached-vs-MongoDB </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Thu Aug 18 2016 17:35:28 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

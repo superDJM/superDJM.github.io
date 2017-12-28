@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            keepalive（前端高可用）初探
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/07/27/keepalive-ef-bc-88-e5-89-8d-e7-ab-af-e9-ab-98-e5-8f-af-e7-94-a8-ef-bc-89-e5-88-9d-e6-8e-a2/"> 
+                    keepalive（前端高可用）初探 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-07-27   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/架构/">架构</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#一、前言"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;&#x524D;&#x8A00;" class="headerlink" title="&#x4E00;&#x3001;&#x524D;&#x8A00;"></a>&#x4E00;&#x3001;&#x524D;&#x8A00;</span></a></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#二、正文"><span class="toc-list-text"><a href="#&#x4E8C;&#x3001;&#x6B63;&#x6587;" class="headerlink" title="&#x4E8C;&#x3001;&#x6B63;&#x6587;"></a>&#x4E8C;&#x3001;&#x6B63;&#x6587;</span></a><ol class="toc-list-child"><li class="toc-list-item toc-list-level-3"><a class="toc-list-link" href="#一、安装keepalive"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;&#x5B89;&#x88C5;keepalive" class="headerlink" title="&#x4E00;&#x3001;&#x5B89;&#x88C5;keepalive"></a>&#x4E00;&#x3001;&#x5B89;&#x88C5;keepalive</span></a></li><li class="toc-list-item toc-list-level-3"><a class="toc-list-link" href="#二、配置"><span class="toc-list-text"><a href="#&#x4E8C;&#x3001;&#x914D;&#x7F6E;" class="headerlink" title="&#x4E8C;&#x3001;&#x914D;&#x7F6E;"></a>&#x4E8C;&#x3001;&#x914D;&#x7F6E;</span></a></li></ol></li><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#三、小结"><span class="toc-list-text"><a href="#&#x4E09;&#x3001;&#x5C0F;&#x7ED3;" class="headerlink" title="&#x4E09;&#x3001;&#x5C0F;&#x7ED3;"></a>&#x4E09;&#x3001;&#x5C0F;&#x7ED3;</span></a></li></ol>
+</div>
+            <div class="content">
+                <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>在大型网站架构中，我们常常会部署nginx、haproxy、lvs等反向代理进行负载均衡。</p>
+<p>可是单点的nginx总是会出现故障，我们就有了keepalive、zookeeper等维护反向代理集群，实现前端高可用。</p>
+<p>本文要用的是nginx+keepalive，nginx的负载均衡在这也不展开了。主要介绍一下keepalive的选举机制；VRRP。</p>
+<p>虚拟路由冗余协议(Virtual Router Redundancy Protocol，简称VRRP)是由IETF提出的解决局域网中配置静态网关出现单点失效现象的路由协议</p>
+<div class="para">VRRP的工作过程如下：</div>
+
+<ol>
+<li><div class="para">路由器开启VRRP功能后，会根据优先级确定自己在备份组中的角色。优先级高的路由器成为主用路由器，优先级低的成为备用路由器。主用路由器定期发送VRRP通告报文，通知备份组内的其他路由器自己工作正常；备用路由器则启动定时器等待通告报文的到来。</div></li>
+<li><div class="para">VRRP在不同的主用抢占方式下，主用角色的替换方式不同：</div><br><div class="para">l在抢占方式下，当主用路由器收到VRRP通告报文后，会将自己的优先级与通告报文中的优先级进行比较。如果大于通告报文中的优先级，则成为主用路由器；否则将保持备用状态。</div><br><div class="para">l在非抢占方式下，只要主用路由器没有出现故障，备份组中的路由器始终保持主用或备用状态，备份组中的路由器即使随后被配置了更高的优先级也不会成为主用路由器。</div></li>
+<li><div class="para">如果备用路由器的定时器超时后仍未收到主用路由器发送来的VRRP通告报文，则认为主用路由器已经无法正常工作，此时备用路由器会认为自己是主用路由器，并对外发送VRRP通告报文。备份组内的路由器根据优先级选举出主用路由器，承担报文的转发功能</div><br>我们下面就来实战一下。</li>
+</ol>
+<h2 id="二、正文"><a href="#二、正文" class="headerlink" title="二、正文"></a>二、正文</h2><h3 id="一、安装keepalive"><a href="#一、安装keepalive" class="headerlink" title="一、安装keepalive"></a>一、安装keepalive</h3><p>使用包管理工具yum或者apt来获取keepalive，或者可以上网下载源码包，自己make编译。这里就不贴出来了。</p>
+<h3 id="二、配置"><a href="#二、配置" class="headerlink" title="二、配置"></a>二、配置</h3><p>因为主备的配置都大同小异，所以注意以下的不同之处即可。</p>
+<p>/etc/keepalived/keepalived.conf</p>
+<pre><code>! Configuration File for keepalived
+global_defs {
+    #这一部分配置报警的通知邮箱
+    notification_email {
+        #zhouxiao@example.com
+        #itsection@example.com
+    }
+    #notification_email_from itsection@example.com
+    #smtp_server mail.example.com
+    #smtp_connect_timeout 30
+    #名字
+    router_id NGINX_DEVEL
+}
+#进行心跳脚本的配置
+vrrp_script chk_nginx {
+#    script &quot;killall -0 nginx&quot;
+    script &quot;/etc/keepalived/check_nginx.sh&quot;
+    interval 2
+    weight -5
+    fall 3
+    rise 2
+}
+
+vrrp_instance VI_1 {
+    #配置主从机，MASTER为主，BACKUP为从。
+    state BACKUP
+    #要监控的接口
+    interface eth0
+#    mcast_src_ip 172.17.0.7
+    #id，所有主备机要保持一致
+    virtual_router_id 51
+    #选举时成为主机的优先级，配置时每台主备机要配置不一样的值
+    priority 100
+    #组播信息发送间隔，保持一致
+    advert_int 2
+    #VRRP的鉴权，所有主备机要保持一致
+    authentication {
+        auth_type PASS
+        auth_pass 1111   
+    }
+    #要绑定的虚拟vip，所有主备机要保持一致
+    virtual_ipaddress {
+        172.17.0.6
+    }
+    #对应上面的脚本的配置
+    track_script {
+       chk_nginx
+    }
+}`&lt;/pre&gt;
+心跳脚本/etc/keepalived/check_nginx.sh
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`#!/bin/bash
+#检测nginx的进程数，如果为0，休眠两秒不能恢复，主动停止keepalive进程。
+counter=$(ps -C nginx --no-heading|wc -l)
+if [ &quot;${counter}&quot; = &quot;0&quot; ]; then
+    /usr/local/bin/nginx
+    sleep 2
+    counter=$(ps -C nginx --no-heading|wc -l)
+    if [ &quot;${counter}&quot; = &quot;0&quot; ]; then
+        /etc/init.d/keepalived stop
+    fi
+fi`&lt;/pre&gt;
+&amp;nbsp;
+
+配置就到此结束。
+
+### 三、结果观察
+
+开启keepalive服务。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`root@c56be86de341:~#``keepalive -D
+root@c56be86de341:~# ip addr
+1: lo: &amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt; mtu 65536 qdisc noqueue state UNKNOWN group default
+ link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+ inet 127.0.0.1/8 scope host lo
+ valid_lft forever preferred_lft forever
+ inet6 ::1/128 scope host
+ valid_lft forever preferred_lft forever
+9: eth0: &amp;lt;BROADCAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc noqueue state UP group default
+ link/ether 02:42:ac:11:00:04 brd ff:ff:ff:ff:ff:ff
+ inet 172.17.0.4/16 scope global eth0
+ valid_lft forever preferred_lft forever
+ inet &lt;span style=&quot;color: #ff0000;&quot;&gt;172.17.0.6&lt;/span&gt;/32 scope global eth0
+ valid_lft forever preferred_lft forever
+ inet6 fe80::42:acff:fe11:4/64 scope link
+ valid_lft forever preferred_lft forever
+`&lt;/pre&gt;
+主（172.17.0.4）已经成功绑定vip。ping通。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`vagrant@supin:~$ ping 172.17.0.6
+PING 172.17.0.6 (172.17.0.6) 56(84) bytes of data.
+64 bytes from 172.17.0.6: icmp_seq=1 ttl=64 time=0.057 ms
+64 bytes from 172.17.0.6: icmp_seq=2 ttl=64 time=0.035 ms
+64 bytes from 172.17.0.6: icmp_seq=3 ttl=64 time=0.046 ms
+64 bytes from 172.17.0.6: icmp_seq=4 ttl=64 time=0.035 ms
+64 bytes from 172.17.0.6: icmp_seq=5 ttl=64 time=0.041 ms
+^C
+--- 172.17.0.6 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 3999ms
+rtt min/avg/max/mdev = 0.035/0.042/0.057/0.011 ms`&lt;/pre&gt;
+kill掉主机的keepalive。查看备机的ip状态。vip已经成功漂移到备机（172.17.0.9）。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`root@778a812a82b0:~# ip addr
+1: lo: &amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt; mtu 65536 qdisc noqueue state UNKNOWN group default
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+15: eth0: &amp;lt;BROADCAST,UP,LOWER_UP&amp;gt; mtu 1500 qdisc noqueue state UP group default
+    link/ether 02:42:ac:11:00:09 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.9/16 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet &lt;span style=&quot;color: #ff0000;&quot;&gt;172.17.0.6&lt;/span&gt;/32 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:acff:fe11:9/64 scope link
+       valid_lft forever preferred_lft forever
+</code></pre><p>验证成功。</p>
+<h2 id="三、小结"><a href="#三、小结" class="headerlink" title="三、小结"></a>三、小结</h2><p>上面我们搭建的是keepalive的主从模式，这样会导致永远只有一台主机处于访问状态。</p>
+<p>还有一种模式叫双主模式，允许两台机器均处于工作状态并互相作为备份。</p>
+<p>搭建keepalived双主模式的要素：</p>
+<p>1、必须有两个虚拟IP, 分别绑定至两个节点上</p>
+<p>2.、每个节点作为某个虚拟IP的主节点，并同时作为另外一个虚拟IP的备用节点。</p>
+<p>3.、当某个节点产生故障时，两个虚拟IP自动绑定至正常节点上</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/07/27/keepalive-ef-bc-88-e5-89-8d-e7-ab-af-e9-ab-98-e5-8f-af-e7-94-a8-ef-bc-89-e5-88-9d-e6-8e-a2/">http://superdjm.github.io/2016/07/27/keepalive-ef-bc-88-e5-89-8d-e7-ab-af-e9-ab-98-e5-8f-af-e7-94-a8-ef-bc-89-e5-88-9d-e6-8e-a2/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/07/28/e7-94-a8explain-e5-91-bd-e4-bb-a4-e5-88-86-e6-9e-90mysql-e6-80-a7-e8-83-bd/">  用explain命令分析mysql性能</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/07/25/mongoose-e5-9c-a8-e5-88-9b-e5-bb-bamodel-e6-97-b6-e5-af-b9collection-e7-9a-84-e5-91-bd-e5-90-8d-e7-ad-96-e7-95-a5/"> Mongoose在创建Model时对Collection的命名策略 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Wed Jul 27 2016 16:14:12 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

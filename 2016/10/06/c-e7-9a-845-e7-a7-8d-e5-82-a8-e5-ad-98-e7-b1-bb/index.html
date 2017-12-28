@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            c的5种储存类
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/10/06/c-e7-9a-845-e7-a7-8d-e5-82-a8-e5-ad-98-e7-b1-bb/"> 
+                    c的5种储存类 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-10-06   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/杂记/">杂记</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>在c语言里面，用于储存程序数据的内存可用存储时期、作用域、链接来表征。</p>
+<p>储存时期可以是静态的、自动的或者分配的。如果是静态的，内存在程序开始执行的时候被分配，并在程序运行时一直存在。如果是自动的，变量所用的内存在程序执行到该变量定义的 代码块时开始分配，在退出代码时，自动释放。如果是程序员自己分配的（malloc或者其他相关函数）内存，通过free（）释放。<br>作用域决定了哪一部分程序可以访问某个数据。在所有函数之外定义的变量具有问津啊作用域，并对该变量声明之后定义的全部函数可见。在代码块里面定义或者作为函数参数定义的变量具有代码块作用域，并只在该代码块及其子代码块中可见。</p>
+<p>链接描述了程序的某个单元定义的变量可被链接到其他的哪些地方。具有代码块作用域的变量作为局部变量，具有空链接。具有文件作用域的变量可有内部链接或外部链接。内部链接意味着变量只可在包含变量定义的文件内部使用，外部链接意味着变量可以在其他文件中使用。</p>
+<p>下面是5种存储类：</p>
+<p>自动—-在一个代码块内(或在一个函数头部作为参量)声明的变量，无论有没有储存类修饰符auto，都属于自动储存类，该类具有自动储存时期、代码块作用域和空链接。若未经初始化，他的值是不定的。</p>
+<p>寄存器—-在一个代码块内(或在一个函数头部作为参量)使用储存类修饰符register声明的变量属于寄存器储存类。把一个变量声明为寄存器变量可以指示编译器提供可用的最快访问（根据系统情况选择存放在寄存器还是高速内存，你无法获取他的地址）。在其他许多方面，和auto类一样。</p>
+<p>静态、空链接—-在一个代码块内使用储存类修饰符static声明的变量属于静态空链接储存类。该类拥有静态储存时期、代码块作用域和空链接，仅在编译的时候初始化一次。如未明确初始化，所有的字节都被设定为0.</p>
+<p>静态、外部链接—-在所有函数外部定义、未使用static声明的变量属于静态、外部链接储存类。该类拥有静态储存时期、代码块作用域和外部链接，仅在编译的时候初始化一次。如未明确初始化，所有的字节都被设定为0.</p>
+<p>静态、内部链接—–在所有函数外部定义、使用了static声明的变量属于静态、外部链接储存类。该类拥有静态储存时期、代码块作用域和外部链接，仅在编译的时候初始化一次。如未明确初始化，所有的字节都被设定为0.</p>
+<p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/10/06/c-e7-9a-845-e7-a7-8d-e5-82-a8-e5-ad-98-e7-b1-bb/">http://superdjm.github.io/2016/10/06/c-e7-9a-845-e7-a7-8d-e5-82-a8-e5-ad-98-e7-b1-bb/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/10/07/static-e7-9a-84-e4-bd-9c-e7-94-a8/">  static的作用</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/10/06/e8-bf-9b-e7-a8-8b-e4-b8-8e-e7-ba-bf-e7-a8-8b/"> 进程与线程 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Thu Oct 06 2016 22:05:27 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

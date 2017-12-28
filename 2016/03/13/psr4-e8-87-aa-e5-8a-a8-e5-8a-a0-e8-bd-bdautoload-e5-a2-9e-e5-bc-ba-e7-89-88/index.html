@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            PSR4 自动加载(autoload)增强版
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/13/psr4-e8-87-aa-e5-8a-a8-e5-8a-a0-e8-bd-bdautoload-e5-a2-9e-e5-bc-ba-e7-89-88/"> 
+                    PSR4 自动加载(autoload)增强版 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-13   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-2"><a class="toc-list-link" href="#Closure-Example"><span class="toc-list-text"><a href="#Closure-Example" class="headerlink" title="Closure Example"></a>Closure Example</span></a></li></ol>
+</div>
+            <div class="content">
+                <p>PSR4是对PSR0的补充，基本可以替代PSR0了。</p>
+<p>我简单说下，主要是以下几点：<br>1. 废除了PSR-0中<code>_</code>就是目录分割符的写法，<code>_</code>下划线在完全限定类名中是没有特殊含义了。<br>2. 类文件名要以 .php 结尾。<br>3. 类名必须要和对应的文件名要一模一样，大小写也要一模一样。</p>
+<p>给出一些link大家去参详一下。我也不是太懂。哈哈</p>
+<p><a href="http://segmentfault.com/a/1190000000380008" target="_blank" rel="noopener">http://segmentfault.com/a/1190000000380008</a><br><a href="http://www.4wei.cn/archives/1002186" target="_blank" rel="noopener">http://www.4wei.cn/archives/1002186</a><br><a href="http://wenku.baidu.com/view/7a21e44b48d7c1c708a14577.html#10002-tsina-1-87843-e29b4784eda5d1f51fb0c2a97a15da08" target="_blank" rel="noopener">http://wenku.baidu.com/view/7a21e44b48d7c1c708a14577.html#10002-tsina-1-87843-e29b4784eda5d1f51fb0c2a97a15da08</a><br><a href="https://github.com/hfcorriez/fig-standards" target="_blank" rel="noopener">https://github.com/hfcorriez/fig-standards</a></p>
+<p>最后贴出官方的例子。</p>
+<h2 id="Closure-Example"><a href="#Closure-Example" class="headerlink" title="Closure Example"></a>Closure Example</h2><pre><code>&amp;lt;?php
+/**
+ * An example of a project-specific implementation.
+ * 
+ * After registering this autoload function with SPL, the following line
+ * would cause the function to attempt to load the \Foo\Bar\Baz\Qux class
+ * from /path/to/project/src/Baz/Qux.php:
+ * 
+ *      new \Foo\Bar\Baz\Qux;
+ *      
+ * @param string $class The fully-qualified class name.
+ * @return void
+ */
+spl_autoload_register(function ($class) {
+
+    // project-specific namespace prefix
+    $prefix = &#39;Foo\\Bar\\&#39;;
+
+    // base directory for the namespace prefix
+    $base_dir = __DIR__ . &#39;/src/&#39;;
+
+    // does the class use the namespace prefix?
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        // no, move to the next registered autoloader
+        return;
+    }
+
+    // get the relative class name
+    $relative_class = substr($class, $len);
+
+    // replace the namespace prefix with the base directory, replace namespace
+    // separators with directory separators in the relative class name, append
+    // with .php
+    $file = $base_dir . str_replace(&#39;\\&#39;, &#39;/&#39;, $relative_class) . &#39;.php&#39;;
+
+    // if the file exists, require it
+    if (file_exists($file)) {
+        require $file;
+    }
+});`&lt;/pre&gt;
+&amp;nbsp;
+
+## Class Example
+
+&amp;nbsp;
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+namespace Example;
+
+/**
+ * An example of a general-purpose implementation that includes the optional
+ * functionality of allowing multiple base directories for a single namespace
+ * prefix.
+ * 
+ * Given a foo-bar package of classes in the file system at the following
+ * paths ...
+ * 
+ *     /path/to/packages/foo-bar/
+ *         src/
+ *             Baz.php             # Foo\Bar\Baz
+ *             Qux/
+ *                 Quux.php        # Foo\Bar\Qux\Quux
+ *         tests/
+ *             BazTest.php         # Foo\Bar\BazTest
+ *             Qux/
+ *                 QuuxTest.php    # Foo\Bar\Qux\QuuxTest
+ * 
+ * ... add the path to the class files for the \Foo\Bar\ namespace prefix
+ * as follows:
+ * 
+ *      &amp;lt;?php
+ *      // instantiate the loader
+ *      $loader = new \Example\Psr4AutoloaderClass;
+ *      
+ *      // register the autoloader
+ *      $loader-&amp;gt;register();
+ *      
+ *      // register the base directories for the namespace prefix
+ *      $loader-&amp;gt;addNamespace(&#39;Foo\Bar&#39;, &#39;/path/to/packages/foo-bar/src&#39;);
+ *      $loader-&amp;gt;addNamespace(&#39;Foo\Bar&#39;, &#39;/path/to/packages/foo-bar/tests&#39;);
+ * 
+ * The following line would cause the autoloader to attempt to load the
+ * \Foo\Bar\Qux\Quux class from /path/to/packages/foo-bar/src/Qux/Quux.php:
+ * 
+ *      &amp;lt;?php
+ *      new \Foo\Bar\Qux\Quux;
+ * 
+ * The following line would cause the autoloader to attempt to load the 
+ * \Foo\Bar\Qux\QuuxTest class from /path/to/packages/foo-bar/tests/Qux/QuuxTest.php:
+ * 
+ *      &amp;lt;?php
+ *      new \Foo\Bar\Qux\QuuxTest;
+ */
+class Psr4AutoloaderClass
+{
+    /**
+     * An associative array where the key is a namespace prefix and the value
+     * is an array of base directories for classes in that namespace.
+     *
+     * @var array
+     */
+    protected $prefixes = array();
+
+    /**
+     * Register loader with SPL autoloader stack.
+     * 
+     * @return void
+     */
+    public function register()
+    {
+        spl_autoload_register(array($this, &#39;loadClass&#39;));
+    }
+
+    /**
+     * Adds a base directory for a namespace prefix.
+     *
+     * @param string $prefix The namespace prefix.
+     * @param string $base_dir A base directory for class files in the
+     * namespace.
+     * @param bool $prepend If true, prepend the base directory to the stack
+     * instead of appending it; this causes it to be searched first rather
+     * than last.
+     * @return void
+     */
+    public function addNamespace($prefix, $base_dir, $prepend = false)
+    {
+        // normalize namespace prefix
+        $prefix = trim($prefix, &#39;\\&#39;) . &#39;\\&#39;;
+
+        // normalize the base directory with a trailing separator
+        $base_dir = rtrim($base_dir, DIRECTORY_SEPARATOR) . &#39;/&#39;;
+
+        // initialize the namespace prefix array
+        if (isset($this-&amp;gt;prefixes[$prefix]) === false) {
+            $this-&amp;gt;prefixes[$prefix] = array();
+        }
+
+        // retain the base directory for the namespace prefix
+        if ($prepend) {
+            array_unshift($this-&amp;gt;prefixes[$prefix], $base_dir);
+        } else {
+            array_push($this-&amp;gt;prefixes[$prefix], $base_dir);
+        }
+    }
+
+    /**
+     * Loads the class file for a given class name.
+     *
+     * @param string $class The fully-qualified class name.
+     * @return mixed The mapped file name on success, or boolean false on
+     * failure.
+     */
+    public function loadClass($class)
+    {
+        // the current namespace prefix
+        $prefix = $class;
+
+        // work backwards through the namespace names of the fully-qualified
+        // class name to find a mapped file name
+        while (false !== $pos = strrpos($prefix, &#39;\\&#39;)) {
+
+            // retain the trailing namespace separator in the prefix
+            $prefix = substr($class, 0, $pos + 1);
+
+            // the rest is the relative class name
+            $relative_class = substr($class, $pos + 1);
+
+            // try to load a mapped file for the prefix and relative class
+            $mapped_file = $this-&amp;gt;loadMappedFile($prefix, $relative_class);
+            if ($mapped_file) {
+                return $mapped_file;
+            }
+
+            // remove the trailing namespace separator for the next iteration
+            // of strrpos()
+            $prefix = rtrim($prefix, &#39;\\&#39;);   
+        }
+
+        // never found a mapped file
+        return false;
+    }
+
+    /**
+     * Load the mapped file for a namespace prefix and relative class.
+     * 
+     * @param string $prefix The namespace prefix.
+     * @param string $relative_class The relative class name.
+     * @return mixed Boolean false if no mapped file can be loaded, or the
+     * name of the mapped file that was loaded.
+     */
+    protected function loadMappedFile($prefix, $relative_class)
+    {
+        // are there any base directories for this namespace prefix?
+        if (isset($this-&amp;gt;prefixes[$prefix]) === false) {
+            return false;
+        }
+
+        // look through base directories for this namespace prefix
+        foreach ($this-&amp;gt;prefixes[$prefix] as $base_dir) {
+
+            // replace the namespace prefix with the base directory,
+            // replace namespace separators with directory separators
+            // in the relative class name, append with .php
+            $file = $base_dir
+                  . str_replace(&#39;\\&#39;, &#39;/&#39;, $relative_class)
+                  . &#39;.php&#39;;
+
+            // if the mapped file exists, require it
+            if ($this-&amp;gt;requireFile($file)) {
+                // yes, we&#39;re done
+                return $file;
+            }
+        }
+
+        // never found it
+        return false;
+    }
+
+    /**
+     * If a file exists, require it from the file system.
+     * 
+     * @param string $file The file to require.
+     * @return bool True if the file exists, false if not.
+     */
+    protected function requireFile($file)
+    {
+        if (file_exists($file)) {
+            require $file;
+            return true;
+        }
+        return false;
+    }
+}`&lt;/pre&gt;
+&amp;nbsp;
+
+### Unit Tests
+
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+namespace Example\Tests;
+
+class MockPsr4AutoloaderClass extends Psr4AutoloaderClass
+{
+    protected $files = array();
+
+    public function setFiles(array $files)
+    {
+        $this-&amp;gt;files = $files;
+    }
+
+    protected function requireFile($file)
+    {
+        return in_array($file, $this-&amp;gt;files);
+    }
+}
+
+class Psr4AutoloaderClassTest extends \PHPUnit_Framework_TestCase
+{
+    protected $loader;
+
+    protected function setUp()
+    {
+        $this-&amp;gt;loader = new MockPsr4AutoloaderClass;
+
+        $this-&amp;gt;loader-&amp;gt;setFiles(array(
+            &#39;/vendor/foo.bar/src/ClassName.php&#39;,
+            &#39;/vendor/foo.bar/src/DoomClassName.php&#39;,
+            &#39;/vendor/foo.bar/tests/ClassNameTest.php&#39;,
+            &#39;/vendor/foo.bardoom/src/ClassName.php&#39;,
+            &#39;/vendor/foo.bar.baz.dib/src/ClassName.php&#39;,
+            &#39;/vendor/foo.bar.baz.dib.zim.gir/src/ClassName.php&#39;,
+        ));
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar&#39;,
+            &#39;/vendor/foo.bar/src&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar&#39;,
+            &#39;/vendor/foo.bar/tests&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\BarDoom&#39;,
+            &#39;/vendor/foo.bardoom/src&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar\Baz\Dib&#39;,
+            &#39;/vendor/foo.bar.baz.dib/src&#39;
+        );
+
+        $this-&amp;gt;loader-&amp;gt;addNamespace(
+            &#39;Foo\Bar\Baz\Dib\Zim\Gir&#39;,
+            &#39;/vendor/foo.bar.baz.dib.zim.gir/src&#39;
+        );
+    }
+
+    public function testExistingFile()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\ClassName&#39;);
+        $expect = &#39;/vendor/foo.bar/src/ClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\ClassNameTest&#39;);
+        $expect = &#39;/vendor/foo.bar/tests/ClassNameTest.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+    }
+
+    public function testMissingFile()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;No_Vendor\No_Package\NoClass&#39;);
+        $this-&amp;gt;assertFalse($actual);
+    }
+
+    public function testDeepFile()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\Baz\Dib\Zim\Gir\ClassName&#39;);
+        $expect = &#39;/vendor/foo.bar.baz.dib.zim.gir/src/ClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+    }
+
+    public function testConfusion()
+    {
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\Bar\DoomClassName&#39;);
+        $expect = &#39;/vendor/foo.bar/src/DoomClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+
+        $actual = $this-&amp;gt;loader-&amp;gt;loadClass(&#39;Foo\BarDoom\ClassName&#39;);
+        $expect = &#39;/vendor/foo.bardoom/src/ClassName.php&#39;;
+        $this-&amp;gt;assertSame($expect, $actual);
+    }
+}
+</code></pre><p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/13/psr4-e8-87-aa-e5-8a-a8-e5-8a-a0-e8-bd-bdautoload-e5-a2-9e-e5-bc-ba-e7-89-88/">http://superdjm.github.io/2016/03/13/psr4-e8-87-aa-e5-8a-a8-e5-8a-a0-e8-bd-bdautoload-e5-a2-9e-e5-bc-ba-e7-89-88/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/13/psr6-e7-bc-93-e5-ad-98-e6-8e-a5-e5-8f-a3/">  PSR6 缓存接口</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/13/psr3-e6-97-a5-e5-bf-97-e6-8e-a5-e5-8f-a3/"> PSR3 日志接口 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sun Mar 13 2016 11:58:28 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

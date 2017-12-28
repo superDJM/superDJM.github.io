@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            分布式一致性算法
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/09/04/e5-88-86-e5-b8-83-e5-bc-8f-e4-b8-80-e8-87-b4-e6-80-a7-e7-ae-97-e6-b3-95/"> 
+                    分布式一致性算法 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-09-04   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/架构/">架构</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  <ol class="toc-list"><li class="toc-list-item toc-list-level-3"><a class="toc-list-link" href="#一、强一致性"><span class="toc-list-text"><a href="#&#x4E00;&#x3001;&#x5F3A;&#x4E00;&#x81F4;&#x6027;" class="headerlink" title="&#x4E00;&#x3001;&#x5F3A;&#x4E00;&#x81F4;&#x6027;"></a>&#x4E00;&#x3001;&#x5F3A;&#x4E00;&#x81F4;&#x6027;</span></a></li><li class="toc-list-item toc-list-level-3"><a class="toc-list-link" href="#二、弱一致性"><span class="toc-list-text"><a href="#&#x4E8C;&#x3001;&#x5F31;&#x4E00;&#x81F4;&#x6027;" class="headerlink" title="&#x4E8C;&#x3001;&#x5F31;&#x4E00;&#x81F4;&#x6027;"></a>&#x4E8C;&#x3001;&#x5F31;&#x4E00;&#x81F4;&#x6027;</span></a></li></ol>
+</div>
+            <div class="content">
+                <h3 id="一、强一致性"><a href="#一、强一致性" class="headerlink" title="一、强一致性"></a>一、强一致性</h3><p>R+W&gt;N，建设有3个节点，每次读时，读2个节点并且数据一致；写时，写2个节点都成功才算写成功。这种是强一致性。</p>
+<p>2PC，3PC 多个节点都成功时，才算成功，否则进行回滚操作。</p>
+<p>PAXOS，类似于2PC,解决分布式系统如何就某个值（决议）达成一致，进行投票选举。是一种无主的节点的算法。分布式的协调服务zookeeper就实现了这个算法，保障一致性。mongodb中的集群方案replicaset也实现了类似的算法。</p>
+<h3 id="二、弱一致性"><a href="#二、弱一致性" class="headerlink" title="二、弱一致性"></a>二、弱一致性</h3><p>由于分布式系统在数据同步时的网络延迟等等因素，无法保证副本数据和主节点时刻保持一致，当出现不一致的时，可以采用以下几种策略保证最终一致性</p>
+<p>Gossip（Cassandra，Dynamo），是带冗余容错算法，也就是最终一致性的算法，无法保证某时刻所有节点数据一致，它是一个去中心化的部署方式，集群中每个节点维护一组状态，状态可以用key,value，外带一个版本号表示，版本大的比版本小的数据新，节点之间相互交流数据的版本信息，并更新数据，类似病毒式的传递，这样数据可以达到最终一致。Cassandra就是采取这种策略来进行数据的同步,并且维护节点的健康状态。</p>
+<p>Raft:</p>
+<p>在一个由 Raft 协议组织的集群中有三类角色：</p>
+<ul>
+<li>Leader（领袖）</li>
+<li>Follower（群众）</li>
+<li>Candidate（候选人）<br>就像一个民主社会，领袖由民众投票选出。刚开始没有领袖，所有集群中的参与者都是群众，那么首先开启一轮大选，在大选期间所有群众都能参与竞选，这时所有群众的角色就变成了候选人，民主投票选出领袖后就开始了这届领袖的任期，然后选举结束，所有除领袖的候选人又变回群众角色服从领袖领导。这里提到一个概念「任期」，用术语 Term 表达。</li>
+</ul>
+<p>Leader选举阶段</p>
+<p>1、至少有三个Candidate，因为要保证其中一个能获得多数票。</p>
+<p>2、所有Candidate启动随机的定时器，timeout后，Candidate会先投自己一票，然后向其他人发送拉票申请。</p>
+<p>3、Candidate收到其他人的拉票请求后，在没有投过票的情况下，给最早到达的拉票投票。</p>
+<p>4、当一个Candidate获得多数票后，会宣布自己当选Leader，然后item+1，如果，没有一个节点当选，则执行随机退让算法，重新启动随机器，进行新的一轮投票，直到一个Candidate当选为止。</p>
+<p>一致性的保证</p>
+<p>1、client先向Leader发请求，Leader向所有Follower广播，当Leader收到半数的ack后，才向client回复ack。</p>
+<p>2、保证Leader拥有最新的数据，当一个Follower挂掉回复以后，会接受Leader的日志同步。</p>
+<p>3、当Leader挂掉以后，然后经过一定的心跳时间都没有回复的话，会进行新的选举，选出的新leader的任期要加1.</p>
+<p>4、如果挂掉的Leader在选举期间的拉票请求广播被其他Candidate收到的时候，先检查任期，比当前任期小的Candidate一律不投票。</p>
+<p>问题</p>
+<p>1、脑裂问题，如果出现物理的网络分区现象，Leader存在的分区如果还是多数票则不会重新选举。新分区节点大于2会进行Leader选举。因此出现双Leader。但新分区的Leader的任期会比原Leader新，所以当网络恢复的时候，原Leader发现新的Leader的任期比自己新，会降级为Follower重新同步数据。</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/09/04/e5-88-86-e5-b8-83-e5-bc-8f-e4-b8-80-e8-87-b4-e6-80-a7-e7-ae-97-e6-b3-95/">http://superdjm.github.io/2016/09/04/e5-88-86-e5-b8-83-e5-bc-8f-e4-b8-80-e8-87-b4-e6-80-a7-e7-ae-97-e6-b3-95/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/10/06/e8-bf-9b-e7-a8-8b-e4-b8-8e-e7-ba-bf-e7-a8-8b/">  进程与线程</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/08/25/mysql-e6-89-a9-e5-b1-95-e5-ad-97-e6-ae-b5-e7-9a-84-e8-ae-be-e8-ae-a1/"> Mysql 扩展字段的设计 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sun Sep 04 2016 15:28:53 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

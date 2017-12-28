@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>
+        
+            PSR2 代码风格指导
+        
+    </title>
+    <link rel="icon" href="/img/favicon.png"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <link rel="stylesheet" href="/css/hljs.min.css">
+    <script src="/js/hljs.min.js"></script>  
+    <script src="/js/gitment.browser.js"></script>  
+</head>
+<body>
+    <header class="header" id="header">
+    <h1>
+        <a class="title" href="/">
+            LEARN
+        </a>
+    </h1>
+    <h2>
+        <a class="motto">
+            Learn More Think More
+        </a>
+    </h2>
+    <nav class="navbar">
+        <ul class="menu">
+            
+            
+                <li class="menu-item">
+                    <a href="/" class="menu-item-link">
+                        Home
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/archives/" class="menu-item-link">
+                        Archives
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/about/" class="menu-item-link">
+                        About
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="https://github.com/superDJM/" class="menu-item-link">
+                        Github
+                    </a>
+                </li>
+            
+                
+            
+                <li class="menu-item">
+                    <a href="/atom.xml" class="menu-item-link">
+                        RSS
+                    </a>
+                </li>
+            
+                
+            
+                
+                
+                <li class="menu-item">
+                    <a class="menu-item-link search">
+                        Search                   
+                        <i class="fa fa-long-arrow-right search-icon" aria-hidden="true"></i>
+                    </a>
+                        <input placeholder="Search..." class="search-input" style="display:none;border:none!important;" onkeydown="onEnter(event)" onkeypress="onEnter(event)"></input>
+                </li>
+                
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+        <article class="post">
+            <h1>
+                <a class="title" href="/2016/03/13/psr2/"> 
+                    PSR2 代码风格指导 
+                </a>
+            </h1>
+            <div class="meta">
+                <a class="date"> 
+                    <i class="fa fa-calendar" aria-hidden="true"></i>                    
+                    2016-03-13   
+                </a>
+                
+                <a class="category">
+                    <i class="fa fa-th" aria-hidden="true"></i>  
+                </a>
+               
+                <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a></li></ul>
+                
+                    
+            </div>
+<div class="toc">
+  
+</div>
+            <div class="content">
+                <p>PSR2 编码风格向导。</p>
+<p>PSR2是用来约束<strong>代码风格</strong>的。可是说是所有里面最关键最重要的，也是需要好好规范和共同遵守的。</p>
+<p>还是按照惯例一句句的翻译。</p>
+<blockquote>
+<p>1、Code MUST follow a “coding style guide” PSR [<a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md" target="_blank" rel="noopener">PSR-1</a>].</p>
+<p>代码必须遵循psr1规范。</p>
+<p>2、Code MUST use 4 spaces for indenting, not tabs.</p>
+<p>代码必须使用4个空格来缩进，而不是tab键<br>这一点感触较深，因为用sublime或者phpstrom的时候，默认tab是4个空格，可是到了win下面的notepad++，就变成2个空格了，瞬间代码就变得不堪入目。。<br>3、There MUST NOT be a hard limit on line length; the soft limit MUST be 120 characters; lines SHOULD be 80 characters or less.</p>
+<p>代码行的长度不应该硬性规定，一个行长度要求必须小于<strong>120</strong>个字符，应该小于<strong>80</strong>字符或更少。</p>
+<p>4、There MUST be one blank line after the <code>namespace</code> declaration, and there MUST be one blank line after the block of <code>use</code> declarations.</p>
+<p>在namespace的声明下面必须要有一<strong>空行</strong>，在声明use下面也必须有一<strong>空行。</strong></p>
+</blockquote>
+<pre><code>&amp;lt;?php
+namespace \Project\First\Learn;
+
+use \Project\First\Learn\AClass;
+
+class MyClass ( )
+{
+}`&lt;/pre&gt;
+&gt; 5、Opening braces for classes MUST go on the next line, and closing braces MUST go on the next line after the body.
+</code></pre><blockquote>
+<pre><code>6、Opening braces for methods MUST go on the next line, and closing braces MUST go on the next line after the body.
+
+
+_**类和方法**_开始的大括号必须另起一行，结束的大括号也必须在最后另起一行。
+
+
+7、Visibility MUST be declared on all properties and methods; `abstract` and `final` MUST be declared before the visibility; `static` MUST be declared after the visibility.
+
+
+所有**属性和方法**前面必须声明其**可见性，**abstract 和final必须修饰在可见性之前，static必须声明在可见性之后。
+什么是visibility可见性呢，其实就是三个访问控制符public、protected、private.这里要注意不能省略不写，也不可以用var来定义php的变量（var是php4里面使用，php5里面var等同于public）
+</code></pre><p>8、Control structure keywords MUST have one space after them; method and function calls MUST NOT.</p>
+<pre><code>控制结构的关键词的后面必须要一个空格，方法和函数调用则不能够有空格。
+
+
+9、Opening braces for control structures MUST go on the same line, and closing braces MUST go on the next line after the body.
+
+
+控制结构的开始大括号必须不换行，结束大括号必须换行。
+
+
+10、Opening parentheses for control structures MUST NOT have a space after them, and closing parentheses for control structures MUST NOT have a space before.
+
+
+控制结构的开始圆括号之后不能有空格，结束圆括号之前也不能够出现空格。
+上面的8－10点我最后会贴出一个例子来说明。
+</code></pre></blockquote>
+<pre><code>下面补充几点。
+&gt; 1、源文件
+</code></pre><blockquote>
+<pre><code>All PHP files MUST use the Unix LF (linefeed) line ending.
+
+
+All PHP files MUST end with a single blank line.
+
+
+The closing `?&amp;gt;` tag MUST be omitted from files containing only PHP.
+
+
+所有的php源文件必须是用LF做换行符，结尾必须要留一空行且不能够有?&amp;gt;
+不能够以?&amp;gt;结尾是因为防止在结尾之后出现空行或者其它误输入导致脚本不正常输出。
+</code></pre><p>2、行</p>
+<pre><code>Blank lines MAY be added to improve readability and to indicate related blocks of code.
+
+
+There MUST NOT be more than one statement per line.
+
+
+可以加入适当的空行来增强代码的可阅读性和指出相关的代码块。
+
+
+每行必须只有一句php代码。
+
+
+3、关键字和Ture、False、Null
+
+
+PHP [keywords](http://php.net/manual/en/reserved.keywords.php) MUST be in lower case.
+
+
+The PHP constants `true`, `false`, and `null` MUST be in lower case.
+
+
+php的关键字和true、false、null必须小写
+
+
+4、继承与实现
+
+
+The `extends` and `implements` keywords MUST be declared on the same line as the class name.
+
+
+继承和实现这两个关键字必须与类名在同一行声明。
+
+
+Lists of `implements` MAY be split across multiple lines, where each subsequent line is indented once. When doing so, the first item in the list MUST be on the next line, and there MUST be only one interface per line.
+um，好长，，直接举例子。
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`class ClassName extends ParentClass implements
+    \ArrayAccess,
+    \Countable,
+    \Serializable
+{
+    // constants, properties, methods
+}`&lt;/pre&gt;
+最后给一个官方的完全遵循了psr2的代码。要注意if的空格，他和foreach、switch case、for、while、do while、try catch的空格要求是一样的：
+</code></pre></blockquote>
+<pre><code>1、关键词后面要空，if ()
+
+2、第一个参数和最后一个参数贴紧圆括号.参数后逗号然后空格之后才是下一个参数。
+
+if ($a, $b, $c)
+
+3、开始花括号不能换行，结束大括号必须换行。
+
+if ($a, $b, $c) {
+
+}
+
+4.switch的break;要换行写。
+
+switch ($str) {
+
+case 0: echo &#39;0&#39;;
+
+break;
+
+}
+&lt;pre class=&quot;pure-highlightjs&quot;&gt;`&amp;lt;?php
+namespace Vendor\Package;
+
+use FooInterface;
+use BarClass as Bar;
+use OtherVendor\OtherPackage\BazClass;
+
+class Foo extends Bar implements FooInterface
+{
+    public function sampleFunction($a, $b = null)
+    {
+        if ($a === $b) {
+            bar();
+        } elseif ($a &amp;gt; $b) {
+            $foo-&amp;gt;bar($arg1);
+        } else {
+            BazClass::bar($arg2, $arg3);
+        }
+    }
+
+    final public static function bar()
+    {
+        // method body
+    }
+}
+</code></pre><p>&nbsp;</p>
+<p>&nbsp;</p>
+
+            </div>
+          
+           
+            <div class="copyright">
+                <div class="name">
+                    <a>本文作者:</a>
+                    <a>Jamie Deng</a>
+                </div>
+                <div class="link">
+                    <a>本文链接:</a>
+                    <a class="permalink" href="http://superdjm.github.io/2016/03/13/psr2/">http://superdjm.github.io/2016/03/13/psr2/</a>
+                </div>
+                <div class="license">
+                    <a>版权声明:</a>
+                    <a>本博客所有文章除特别声明外，均采用许可协议 CC BY-NC-SA 3.0 CN。转载请注明出处！</a>
+                </div>
+            </div>
+            
+
+          
+
+
+</article>
+
+
+<div class="tip">
+<button class="tip-btn">
+    打赏
+</button>
+<div class="tip-img">
+<ul>
+    
+ 
+</ul>
+</div>
+</div>
+
+<div class="more">
+
+    <div class="prev">
+   <a href="/2016/03/13/psr3-e6-97-a5-e5-bf-97-e6-8e-a5-e5-8f-a3/">  PSR3 日志接口</a>
+    </div>
+
+<div></div>
+
+    <div class="next">
+    <a href="/2016/03/12/psr1/"> PSR1 基本代码规范 </a>
+    </div>
+    
+</div>
+
+<div class="bdsharebuttonbox">
+<a href="#" class="bds_weixin fa fa-weixin" data-cmd="weixin" title="分享到微信" style="color:#1cbd8f">
+</a>
+<a href="#" class="bds_tsina fa fa-weibo" data-cmd="tsina" title="分享到新浪微博" style="color:#ff6363">
+</a>
+<a href="#" class="bds_twi fa fa-twitter" data-cmd="twi" title="分享到Twitter" style="color:#00A7EB">
+</a>
+<a href="#" class="bds_fbook fa fa-facebook" data-cmd="fbook" title="分享到Facebook" style="color:#00A7EB">
+</a>
+</div>
+<script>
+window._bd_share_config={
+    "common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"1","bdSize":"16"},
+    "share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='../../../../../static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+ 
+<div id="comments"></div>
+
+<script>
+    var gitment = new Gitment({
+    id: "Sun Mar 13 2016 11:27:30 GMT+0800",
+    owner: "superDJM",
+    repo: "superdjm.github.io",
+    oauth: {
+      client_id:"c7c4d858aa3277f5f0d8",
+      client_secret: "a97a902dac40f9758fdd350e2093c782eb45be04",
+    }
+  })
+  gitment.render('comments')
+</script>
+    </main>
+    <a class="not-found">not found!</a>
+    <div class="search-items">
+    </div>
+    <a href="#header" id="top" style="display:none">
+        <i class="fa fa-sort-asc fa-2x"></i>
+    </a>
+    <footer class="footer">
+    <div class="footer-copyright">©️2017
+    <a href="//github.com/Vevlins/toki" class="link" target="_blank">Toki</a>  by Vevlins
+    </div>
+</footer>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/toki.js"></script>  
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
